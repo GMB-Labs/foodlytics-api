@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     AUTH0_CLIENT_ID: str
     AUTH0_CLIENT_SECRET: str
     AUTH0_AUDIENCE: str
+    AUTH0_ALGORITHMS: str
 
     class Config:
         env_file = ".env"

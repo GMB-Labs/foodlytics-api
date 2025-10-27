@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
-from src.shared.infrastructure.db.engine import engine
+
+from sqlalchemy import text
+from src.shared.infrastructure.persistence.sqlalchemy.engine import engine
 
 #importar los controllers papai (por bounded context)
-    #algo asi typeshii -> from src.controllers.user_controller import router as user_router
 from src.iam.interfaces.rest.auth_controller import AuthController
 
 
@@ -25,11 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+API_PREFIX = '/api/v1'
+
 # registro de las rutas de los endpoints typeshii
     #===EJEMPLO===
     #app.include_router(iam_controller, prefix="/auth", tags=["IAM"])
 auth_controller = AuthController()
-app.include_router(auth_controller.router)
+app.include_router(auth_controller.router,prefix=API_PREFIX)
 
 
 

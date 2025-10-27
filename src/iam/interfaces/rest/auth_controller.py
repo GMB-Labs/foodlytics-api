@@ -1,36 +1,42 @@
-from fastapi import APIRouter, Query
-from src.iam.application.internal.auth_service_impl import AuthServiceImpl
+from fastapi import APIRouter, Depends
+from src.iam.domain.services.auth_service import AuthService
+from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
+from src.shared.infrastructure.dependencies import get_token_validation_service
+from src.shared.domain.services.token_validation_service import TokenValidationService
+
 
 class AuthController:
-
-
-    def __init__(self):
-        self.auth_service= AuthServiceImpl()
-        self.router= APIRouter(prefix="/auth", tags=["Auth"])
+    def __init__(
+        self,
+        auth_service: AuthService = Auth0MachineService(),
+    ):
+        self.auth_service = auth_service
+        self.router = APIRouter(prefix="/auth", tags=["Auth"])
         self.register_routes()
 
     def register_routes(self):
-        @self.router.get("/login")
-        def login():
-            domain = self.auth_service.domain
-            client_id = self.auth_service.client_id
-            url = (
-                f"https://{domain}/authorize?"
-                f"response_type=code&"
-                f"client_id={client_id}&"
-                f"redirect_uri={self.auth_service.redirect_uri}&"
-                f"scope=openid%20profile%20email&"
-                f"code_challenge_method=S256"
-            )
-            return {"login_url": url}
+        @self.router.get("/token")
+        def get_machine_token():
+            return self.auth_service.get_machine_token()
 
-        @self.router.get("/callback")
-        def callback(code:str = Query(...),code_verifier: str = Query(...)):
-            """
-            Handles the callback from the authentication provider.
-            :param code:
-            :param code_verifier:
-            :return:
-            """
-            tokens = self.auth_service.exchange_code_for_token(code,code_verifier)
-            return tokens
+        @self.router.get("/me")
+        def get_me(
+            payload=Depends(get_token_validation_service().verify_token),
+            token_service: TokenValidationService = Depends(get_token_validation_service),
+        ):
+            return token_service.get_authenticated_user(payload)
+
+        @self.router.get("/patient-area")
+        def patient_area(payload=Depends(get_token_validation_service().require_role("patient"))):
+            return {"message": "Área del paciente"}
+
+        @self.router.get("/nutritionist-area")
+        def nutritionist_area(payload=Depends(get_token_validation_service().require_role("nutritionist"))):
+            return {"message": "Área del nutricionista"}
+
+        @self.router.get("/records")
+        def get_records(
+                payload=Depends(get_token_validation_service().require_scope("read:diet")),
+                _: dict = Depends(get_token_validation_service().require_role("nutritionist")),
+        ):
+            return {"message": "El nutricionista puede leer dietas"}

@@ -11,4 +11,3 @@ def get_session()-> Session:
         raise
     finally:
         session.close()
-        

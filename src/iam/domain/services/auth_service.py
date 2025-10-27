@@ -6,11 +6,8 @@ class AuthService(ABC):
     Abstract service for handling authentication-related operations.
     """
     @abstractmethod
-    def exchange_code_for_token(self, code: str, code_verifier:str)-> Dict:
+    def get_machine_token(self) -> Dict:
         """
-        Exchanges the authorization code for access tokens.
-        :param code:
-        :param code_verifier:
-        :return:
+        Obtain a machine-to-machine authentication token.
         """
         pass
