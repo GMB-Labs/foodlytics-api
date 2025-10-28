@@ -1,27 +1,49 @@
-from sqlalchemy import Column, String, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
-from datetime import datetime
-import uuid
-
-Base = declarative_base()
+from dataclasses import dataclass
+from typing import List, Optional
+from src.iam.domain.value_objects.user_role import UserRole
 
 
-class User(Base):
-    __tablename__ = 'users'
-    # ID local (clave primaria de tu sistema)
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    # ID de Auth0 (clave externa única, el 'sub')
-    auth0_id = Column(String, unique=True, nullable=False, index=True)
-    email = Column(String, unique=True, nullable=False, index=True)
-    name = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+@dataclass
+class User:
+    id: str
+    username: str
+    email: Optional[str]
+    role: UserRole
+    scopes: List[str]
+    permissions: List[str]
 
-    def __init__(self, auth0_id: str, email: str, name: str = None):
-        self.auth0_id = auth0_id
-        self.email = email
-        self.name = name
+    @classmethod
+    def from_auth0_payload(cls, payload: dict) -> "User":
+        sub = payload.get("sub")
+        email = payload.get("email")
+        scope_raw = payload.get("scope", "")
+        permissions = payload.get("permissions", [])
 
-    def __repr__(self):
-        return f"<User(id={self.id}, auth0_id='{self.auth0_id}', email='{self.email}')>"
+        scopes = scope_raw.split() if isinstance(scope_raw, str) else list(scope_raw)
+
+        if "nutritionist" in scopes or "nutritionist" in permissions:
+            role = UserRole.NUTRITIONIST
+        else:
+            role = UserRole.PATIENT
+
+        username = email if email else sub
+
+        return cls(
+            id=sub,
+            username=username,
+            email=email,
+            role=role,
+            scopes=scopes,
+            permissions=permissions
+        )
+
+    # --- Reglas de dominio opcionales ---
+    def has_permission(self, perm: str) -> bool:
+        """Verifica si el usuario posee un permiso específico."""
+        return perm in self.permissions or perm in self.scopes
+
+    def is_patient(self) -> bool:
+        return self.role == UserRole.PATIENT
+
+    def is_nutritionist(self) -> bool:
+        return self.role == UserRole.NUTRITIONIST
