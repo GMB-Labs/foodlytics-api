@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from src.iam.domain.services.auth_service import AuthService
 from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
 from src.shared.infrastructure.dependencies import get_token_validation_service
-from src.shared.domain.services.token_validation_service import TokenValidationService
+from src.iam.domain.services.token_validation_service import TokenValidationService
 
 
 class AuthController:

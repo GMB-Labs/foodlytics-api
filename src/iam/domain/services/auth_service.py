@@ -8,6 +8,6 @@ class AuthService(ABC):
     @abstractmethod
     def get_machine_token(self) -> Dict:
         """
-        Obtain a machine-to-machine authentication token.
+        Obtain a machine-to-machine authentication token for testing
         """
         pass

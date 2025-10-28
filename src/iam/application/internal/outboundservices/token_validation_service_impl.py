@@ -5,7 +5,7 @@ import requests
 from typing import Dict, Any
 
 from src.shared.infrastructure.settings import settings
-from src.shared.domain.services.token_validation_service import TokenValidationService
+from src.iam.domain.services.token_validation_service import TokenValidationService
 
 
 class Auth0TokenValidationServiceImpl(TokenValidationService):
