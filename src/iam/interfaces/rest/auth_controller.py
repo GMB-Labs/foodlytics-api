@@ -8,7 +8,7 @@ from src.iam.domain.services.token_validation_service import TokenValidationServ
 class AuthController:
     def __init__(
         self,
-        auth_service: AuthService = Auth0MachineService(),
+        auth_service: AuthService
     ):
         self.auth_service = auth_service
         self.router = APIRouter(prefix="/auth", tags=["Auth"])
