@@ -27,16 +27,16 @@ class AuthController:
             return token_service.get_authenticated_user(payload)
 
         @self.router.get("/patient-area")
-        def patient_area(payload=Depends(get_token_validation_service().require_role("patient"))):
+        def patient_area(payload=Depends(get_token_validation_service().require_scope("patient"))):
             return {"message": "Área del paciente"}
 
         @self.router.get("/nutritionist-area")
-        def nutritionist_area(payload=Depends(get_token_validation_service().require_role("nutritionist"))):
+        def nutritionist_area(payload=Depends(get_token_validation_service().require_scope("nutritionist"))):
             return {"message": "Área del nutricionista"}
 
         @self.router.get("/records")
         def get_records(
                 payload=Depends(get_token_validation_service().require_scope("read:diet")),
-                _: dict = Depends(get_token_validation_service().require_role("nutritionist")),
+                _: dict = Depends(get_token_validation_service().require_scope("patient")),
         ):
             return {"message": "El nutricionista puede leer dietas"}

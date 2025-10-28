@@ -11,9 +11,6 @@ class TokenValidationService(ABC):
     def require_scope(self, required_scope: str) -> Callable:
         pass
 
-    @abstractmethod
-    def require_role(self, required_role: str) -> Callable:
-        pass
 
     @abstractmethod
     def get_authenticated_user(self, payload: Dict[str, Any]) -> Dict[str, Any]:
