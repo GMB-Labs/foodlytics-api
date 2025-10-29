@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Optional, List
+from sqlalchemy import Column, String, Enum
+from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
+from src.iam.domain.value_objects.user_role import UserRole
 
-from src.iam.domain.aggregates.user import User
+class UserModel(Base):
+    __tablename__ = "users"
 
-class UserRepository(ABC):
-    @abstractmethod
-    def add_user(self, user: User) -> None: ...
-
-    @abstractmethod
-    def get_all_users(self) -> List[User]: ...
+    id = Column(String, primary_key=True, index=True)
+    username = Column(String, nullable=False)
+    role = Column(Enum(UserRole), nullable=False)
+    email = Column(String, nullable=True)

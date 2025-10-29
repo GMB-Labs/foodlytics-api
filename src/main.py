@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from sqlalchemy import text
 
 from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
-from src.shared.infrastructure.persistence.sqlalchemy.engine import engine
+from src.shared.infrastructure.persistence.sqlalchemy.engine import Base,engine
 
 #importar los controllers papai (por bounded context)
 from src.iam.interfaces.rest.auth_controller import AuthController
@@ -16,6 +15,9 @@ app = FastAPI(
     version='1.0',
     description='API for Foodlytics application',
 )
+
+# Crea todas las tablas
+Base.metadata.create_all(bind=engine)
 
 # Configurar CORS ======DEVELLOPMENT ONLY=======
 # TODO: configurar adecuadamente cuando se tenga un despliegue con dominio especifico
