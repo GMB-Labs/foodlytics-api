@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from src.iam.domain.value_objects.user_role import UserRole
+from src.iam.domain.model.value_objects.user_role import UserRole
 
 
 @dataclass
@@ -37,9 +37,7 @@ class User:
             permissions=permissions
         )
 
-    # --- Reglas de dominio opcionales ---
     def has_permission(self, perm: str) -> bool:
-        """Verifica si el usuario posee un permiso específico."""
         return perm in self.permissions or perm in self.scopes
 
     def is_patient(self) -> bool:
