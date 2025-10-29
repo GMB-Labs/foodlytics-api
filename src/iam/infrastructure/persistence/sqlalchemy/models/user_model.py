@@ -1,24 +1,15 @@
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, String, Index
 from sqlalchemy.types import JSON
-
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
-
-try:
-    JsonType = JSONB
-except Exception:
-    JsonType = JSON
-
 
 class UserModel(Base):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, index=True)
-    username = Column(String, nullable=False)
+    id = Column(String, primary_key=True, index=True)  # auth0 sub
+    username = Column(String, nullable=False, unique=True, index=True)
     email = Column(String, nullable=True, unique=True, index=True)
 
-    role = Column(String, nullable=False)
+    role = Column(String, nullable=False, default="PATIENT")
 
-    #Lists
-    scopes = Column(JsonType, nullable=False, default=list)
-    permissions = Column(JsonType, nullable=False, default=list)
+    scopes = Column(JSON, nullable=False, default=list)
+    permissions = Column(JSON, nullable=False, default=list)

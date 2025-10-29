@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
-
 from src.shared.domain.repositories.base_repository import BaseRepository
 from src.iam.domain.model.aggregates.user import User
-
 
 class UserRepository(BaseRepository[User], ABC):
     @abstractmethod
