@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 class CulqiAPIService:
     def __init__(self):
         self.private_key = os.getenv("CULQI_PRIVATE_KEY")
@@ -17,11 +16,17 @@ class CulqiAPIService:
             "Content-Type": "application/json"
         }
         payload = {
-            "amount": amount,
+            "amount": int(amount),  # Culqi usa centavos
             "currency_code": currency_code,
             "email": email,
             "source_id": source_id,
             "description": description
         }
+
         response = requests.post(url, json=payload, headers=headers)
+        
+        # Manejo de errores
+        if response.status_code != 201:
+            raise Exception(f"Error en Culqi: {response.status_code} - {response.text}")
+        
         return response.json()
