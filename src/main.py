@@ -8,6 +8,7 @@ from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0Mac
 
 # Importar los controladores (bounded contexts)
 from src.iam.interfaces.rest.hello_controller import HelloController
+from src.iam.interfaces.rest.auth_controller import router as auth_router
 from src.iam.interfaces.rest.auth_controller import AuthController
 from src.payments.interfaces.rest.payment_controller import router as payments_router
 
@@ -44,6 +45,8 @@ API_PREFIX = "/api/v1"
 hello_auth_service_impl = Auth0MachineService()
 hello_controller = HelloController(auth_service=hello_auth_service_impl)
 
+app.include_router(hello_controller.router,prefix=API_PREFIX)
+app.include_router(auth_router, prefix=API_PREFIX)
 # Rutas de IAM
 app.include_router(hello_controller.router, prefix=API_PREFIX)
 # Si tienes AuthController también puedes registrar:
