@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import List, Optional
 from src.iam.domain.model.value_objects.user_role import UserRole
+from src.shared.domain.model.aggregates.auditable_aggregate_root import AuditableAbstractAggregateRoot
+from src.shared.domain.model.entities.auditable_model import AuditableModel
 
 
 @dataclass
-class User:
+class  User(AuditableAbstractAggregateRoot):
     id: str
     username: str
     email: Optional[str]

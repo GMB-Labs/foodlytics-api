@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict
 from dataclasses import asdict
@@ -27,6 +27,17 @@ def upsert_user_from_action(
         "scope": body.scope or "",
         "permissions": body.permissions or []
     }
+    user = service.get_or_create_from_payload(payload)
+    return {"ok": True, "id": user.id}
+
+@router.post("/sync")
+def sync_user_from_token(
+    payload: Dict[str, Any] = Depends(get_token_validation_service().verify_token),
+    service: UserService = Depends(get_user_service)
+):
+    if "sub" not in payload:
+        raise HTTPException(status_code=400, detail="Token payload is missing 'sub'")
+
     user = service.get_or_create_from_payload(payload)
     return {"ok": True, "id": user.id}
 

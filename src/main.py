@@ -7,7 +7,7 @@ from src.shared.infrastructure.persistence.sqlalchemy.engine import Base,engine
 
 #importar los controllers papai (por bounded context)
 from src.iam.interfaces.rest.hello_controller import HelloController
-from src.iam.interfaces.rest.auth_controller import AuthController
+from src.iam.interfaces.rest.auth_controller import router as auth_router
 
 
 app = FastAPI(
@@ -37,8 +37,8 @@ API_PREFIX = '/api/v1'
 hello_auth_service_impl = Auth0MachineService()
 hello_controller = HelloController(auth_service=hello_auth_service_impl)
 
-
 app.include_router(hello_controller.router,prefix=API_PREFIX)
+app.include_router(auth_router, prefix=API_PREFIX)
 
 #=========HEALTH & DB CHECK  ==========#
 @app.get("/health")
