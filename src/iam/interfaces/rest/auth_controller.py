@@ -13,6 +13,7 @@ class AuthController(BaseModel):
     scope: str | None = None
     permissions: list[str] | None = []
 
+
 router = APIRouter(prefix="/users-sync", tags=["UsersSync"])
 
 @router.post("/upsert")

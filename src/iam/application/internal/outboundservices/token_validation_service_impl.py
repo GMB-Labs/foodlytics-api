@@ -42,6 +42,7 @@ class Auth0TokenValidationServiceImpl(TokenValidationService):
         except Exception as e:
             raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
+    #TODO: add require_role
     def require_scope(self, required_scope: str):
         def dependency(payload: Dict[str, Any] = Depends(self.verify_token)):
             scopes = payload.get("scope", "").split()

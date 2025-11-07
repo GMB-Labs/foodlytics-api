@@ -5,6 +5,6 @@ class UpdateProfilePictureCommand:
     """
     Command to patch a profile picture.
     """
-    profile_id: int
+    profile_id: str
     picture_data: bytes
     picture_mime_type: str

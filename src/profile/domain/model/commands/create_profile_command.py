@@ -1,11 +1,15 @@
 from dataclasses import dataclass
 
-@dataclass( slots=True)
+from src.profile.domain.model.value_objects.gender import Gender
+from src.profile.domain.model.value_objects.goal_type import GoalType
+
+
+@dataclass(slots=True)
 class CreateProfileCommand:
     """
     Command to create a new profile.
     """
-    id: str
+
     user_id: str
     nutritionist_id: str
     first_name: str
@@ -13,15 +17,34 @@ class CreateProfileCommand:
     age: int
     height_cm: float
     weight_kg: float
-    gender: str
-    goal_type: str
+    gender: Gender
+    goal_type: GoalType
 
-    def __init__(self, user_id, first_name,last_name, age, height_cm, weight_kg, gender, goal_type):
-        self.user_id = user_id
-        self.first_name = first_name
-        self.last_name = last_name
-        self.age = age
-        self.height_cm = height_cm
-        self.weight_kg = weight_kg
-        self.gender = gender
-        self.goal_type = goal_type
+    @classmethod
+    def from_primitives(
+        cls,
+        *,
+        user_id: str,
+        nutritionist_id: str,
+        first_name: str,
+        last_name: str,
+        age: int,
+        height_cm: float,
+        weight_kg: float,
+        gender: str,
+        goal_type: str,
+    ) -> "CreateProfileCommand":
+        """
+        Helper factory that accepts raw strings (e.g. payloads) and converts them into value objects.
+        """
+        return cls(
+            user_id=user_id,
+            nutritionist_id=nutritionist_id,
+            first_name=first_name,
+            last_name=last_name,
+            age=age,
+            height_cm=height_cm,
+            weight_kg=weight_kg,
+            gender=Gender.from_string(gender),
+            goal_type=GoalType.from_string(goal_type),
+        )
