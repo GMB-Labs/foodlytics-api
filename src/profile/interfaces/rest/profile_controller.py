@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status,Response
 
 from src.profile.domain.model.commands.create_profile_command import CreateProfileCommand
 from src.profile.domain.model.commands.update_profile_command import UpdateProfileCommand
@@ -97,6 +97,7 @@ class ProfileController:
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
+
         @self.router.get(
             "/{user_id}",
             response_model=ProfileResponseDTO,
@@ -124,7 +125,7 @@ class ProfileController:
             return [ProfileResponseDTO.from_domain(profile) for profile in profiles]
 
         @self.router.get(
-            "/nutritionists/{nutritionist_id}",
+            "/patients/{nutritionist_id}",
             response_model=List[ProfileResponseDTO],
         )
         def list_by_nutritionist(
@@ -146,3 +147,20 @@ class ProfileController:
                 service.delete_profile(user_id)
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+        @self.router.get("/{user_id}/picture")
+        def get_profile_picture(
+                user_id: str,
+                repository: ProfileRepository = Depends(get_profile_repository),
+        ):
+            profile = repository.find_by_user_id(user_id)
+            if not profile:
+                raise HTTPException(status_code=404, detail="Profile not found.")
+            picture = profile.profile_picture
+            if not picture:
+                raise HTTPException(status_code=404, detail="Profile has no picture.")
+            return Response(
+                content=picture.image_data,
+                media_type=picture.mime_type,
+                headers={"Content-Disposition": f'inline; filename="{user_id}.img"'},
+            )
