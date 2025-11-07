@@ -7,16 +7,10 @@ from src.profile.domain.model.commands.update_profile_command import UpdateProfi
 from src.profile.domain.model.commands.update_profile_picture_command import UpdateProfilePictureCommand
 from src.profile.domain.repositories.profile_repository import ProfileRepository
 from src.profile.domain.services.profile_command_service import ProfileCommandService
-from src.profile.infrastructure.dependencies import (
-    get_profile_command_service,
-    get_profile_repository,
-)
-from src.profile.interfaces.dto.profile_dto import (
-    CreateProfileDTO,
-    ProfileResponseDTO,
-    UpdateProfileDTO,
-)
-
+from src.profile.infrastructure.dependencies import (get_profile_command_service,get_profile_repository,)
+from src.profile.interfaces.dto.profile_dto import ProfileResponseDTO
+from src.profile.interfaces.dto.create_profile_request_dto import CreateProfileDTO
+from src.profile.interfaces.dto.update_profile_request_dto import UpdateProfileDTO
 
 def _model_dump(model, **kwargs):
     """

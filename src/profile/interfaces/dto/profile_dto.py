@@ -1,31 +1,7 @@
 from datetime import datetime
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 from src.profile.domain.model.aggregates.profile import Profile
-
-
-class CreateProfileDTO(BaseModel):
-    user_id: str = Field(..., description="Auth0 user identifier.")
-    nutritionist_id: str = Field(..., description="Assigned nutritionist identifier.")
-    first_name: str
-    last_name: str
-    age: int = Field(..., ge=0)
-    height_cm: float = Field(..., gt=0)
-    weight_kg: float = Field(..., gt=0)
-    gender: str = Field(..., description="Allowed values: male, female, other.")
-    goal_type: str = Field(..., description="Allowed values: definition, maintenance, bulking.")
-
-
-class UpdateProfileDTO(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    age: Optional[int] = Field(None, ge=0)
-    height_cm: Optional[float] = Field(None, gt=0)
-    weight_kg: Optional[float] = Field(None, gt=0)
-    gender: Optional[str] = Field(None, description="Allowed values: male, female, other.")
-    goal_type: Optional[str] = Field(None, description="Allowed values: definition, maintenance, bulking.")
 
 
 class ProfileResponseDTO(BaseModel):
