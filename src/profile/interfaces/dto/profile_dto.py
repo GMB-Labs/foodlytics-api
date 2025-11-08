@@ -6,7 +6,7 @@ from src.profile.domain.model.aggregates.profile import Profile
 
 class ProfileResponseDTO(BaseModel):
     user_id: str
-    nutritionist_id: str
+    nutritionist_id: str | None
     first_name: str
     last_name: str
     age: int

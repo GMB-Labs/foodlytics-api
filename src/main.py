@@ -4,6 +4,8 @@ from sqlalchemy import text, inspect
 
 from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base,engine
+from src.shared.infrastructure.dependencies import get_event_bus
+from src.profile.application.internal.eventhandlers import register_profile_event_handlers
 
 #importar los controllers papai (por bounded context)
 from src.iam.interfaces.rest.hello_controller import HelloController
@@ -38,6 +40,9 @@ API_PREFIX = '/api/v1'
 hello_auth_service_impl = Auth0MachineService()
 hello_controller = HelloController(auth_service=hello_auth_service_impl)
 profile_controller = ProfileController()
+
+# register cross-context event handlers
+register_profile_event_handlers(get_event_bus())
 
 app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)

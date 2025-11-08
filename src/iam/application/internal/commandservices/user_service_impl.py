@@ -1,7 +1,10 @@
 from typing import Optional, Dict
+
+from src.iam.domain.events.user_registered_event import UserRegisteredEvent
 from src.iam.domain.model.aggregates.user import User as User
 from src.iam.domain.repositories.user_repository import UserRepository
 from src.iam.domain.services.user_service import UserService
+from src.shared.domain.events.event_bus import EventBus
 
 
 class UserServiceImpl(UserService):
@@ -10,8 +13,9 @@ class UserServiceImpl(UserService):
     """
 
 
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepository, event_bus: EventBus):
         self.user_repository = user_repository
+        self._event_bus = event_bus
 
     def get_or_create_from_payload(self, payload: Dict) -> User:
         """
@@ -29,6 +33,9 @@ class UserServiceImpl(UserService):
         if not user:
             user = User.from_auth0_payload(payload)
             self.user_repository.save(user)
+            self._event_bus.publish(
+                UserRegisteredEvent(user_id=user.id, role=user.role)
+            )
             return user
 
         updated = User.from_auth0_payload(payload)

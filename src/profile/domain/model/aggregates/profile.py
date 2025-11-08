@@ -12,7 +12,7 @@ from src.shared.domain.model.aggregates.auditable_aggregate_root import Auditabl
 class Profile(AuditableAbstractAggregateRoot):
     id: str
     user_id: str
-    nutritionist_id: str
+    nutritionist_id: Optional[str]
     first_name: str
     last_name: str
     age: int
@@ -25,7 +25,7 @@ class Profile(AuditableAbstractAggregateRoot):
         self,
         *,
         user_id: str,
-        nutritionist_id: str,
+        nutritionist_id: Optional[str],
         first_name: str,
         last_name: str,
         age: int,

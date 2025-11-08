@@ -2,7 +2,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from src.profile.domain.repositories.profile_repository import ProfileRepository
-from src.profile.domain.services.profile_command_service import ProfileCommandService
+from src.profile.application.internal.commandservices.profile_command_service import ProfileCommandService
 from src.profile.infrastructure.persistance.sqlalchemy.repositories.sqlalchemy_profile_repository import (
     SqlAlchemyProfileRepository,
 )

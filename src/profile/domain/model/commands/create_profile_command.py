@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
@@ -11,7 +12,7 @@ class CreateProfileCommand:
     """
 
     user_id: str
-    nutritionist_id: str
+    nutritionist_id: Optional[str]
     first_name: str
     last_name: str
     age: int
@@ -25,7 +26,7 @@ class CreateProfileCommand:
         cls,
         *,
         user_id: str,
-        nutritionist_id: str,
+        nutritionist_id: Optional[str],
         first_name: str,
         last_name: str,
         age: int,

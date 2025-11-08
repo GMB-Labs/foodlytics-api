@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field
 
 class CreateProfileDTO(BaseModel):
     user_id: str = Field(..., description="Auth0 user identifier.")
-    nutritionist_id: str = Field(..., description="Assigned nutritionist identifier.")
+    nutritionist_id: str | None = Field(
+        None, description="Assigned nutritionist identifier. Leave empty for nutritionists."
+    )
     first_name: str
     last_name: str
     age: int = Field(..., ge=0)

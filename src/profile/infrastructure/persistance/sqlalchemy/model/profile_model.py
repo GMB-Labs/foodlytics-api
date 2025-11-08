@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, Integer, LargeBinary, String
+from sqlalchemy import Column, DateTime, Float, Integer, LargeBinary, String, ForeignKey
 
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
 
@@ -8,7 +8,12 @@ class ProfileModel(Base):
 
     id = Column(String(50), primary_key=True)
     user_id = Column(String(50), nullable=False, unique=True, index=True)
-    nutritionist_id = Column(String(50), nullable=False, index=True)
+    nutritionist_id = Column(
+        String(50),
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True
+    )
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     age = Column(Integer, nullable=False)
