@@ -11,8 +11,6 @@ class UserServiceImpl(UserService):
     """
     Implementation of the UserService interface for managing users.
     """
-
-
     def __init__(self, user_repository: UserRepository, event_bus: EventBus):
         self.user_repository = user_repository
         self._event_bus = event_bus

@@ -24,6 +24,11 @@ class InMemoryEventBus(EventBus):
 
     def publish(self, event: DomainEvent) -> None:
         handlers = self._collect_handlers(type(event))
+        logger.debug(
+            "Publishing event %s to %d handler(s)",
+            type(event).__name__,
+            len(handlers),
+        )
         if not handlers:
             return
 
@@ -43,6 +48,11 @@ class InMemoryEventBus(EventBus):
         with self._lock:
             if handler not in self._subscribers[event_type]:
                 self._subscribers[event_type].append(handler)
+                logger.debug(
+                    "Subscribed handler %s to event %s",
+                    getattr(handler, "__class__", type(handler)).__name__,
+                    event_type.__name__,
+                )
 
     def _collect_handlers(self, event_type: Type[DomainEvent]) -> List[EventHandler]:
         with self._lock:

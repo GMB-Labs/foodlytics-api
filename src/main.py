@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
-
+import logging
 from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
+from src.meal_recognition.interfaces.rest.food_recognition_controller import MealRecognitionController
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base,engine
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.profile.application.internal.eventhandlers import register_profile_event_handlers
@@ -18,7 +19,13 @@ app = FastAPI(
     version='1.0',
     description='API for Foodlytics application',
 )
+logging.getLogger("src.shared.infrastructure.events.in_memory_event_bus").setLevel(logging.DEBUG)
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="app.log",
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 # Crea todas las tablas
 Base.metadata.create_all(bind=engine)
 
@@ -47,6 +54,10 @@ register_profile_event_handlers(get_event_bus())
 app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(profile_controller.router, prefix=API_PREFIX)
+
+
+meal_controller = MealRecognitionController()
+app.include_router(meal_controller.router)
 
 #=========HEALTH & DB CHECK  ==========#
 @app.get("/health")

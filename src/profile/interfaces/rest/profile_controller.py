@@ -1,16 +1,22 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status,Response
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Response
 
-from src.profile.domain.model.commands.create_profile_command import CreateProfileCommand
 from src.profile.domain.model.commands.update_profile_command import UpdateProfileCommand
 from src.profile.domain.model.commands.update_profile_picture_command import UpdateProfilePictureCommand
 from src.profile.domain.repositories.profile_repository import ProfileRepository
 from src.profile.application.internal.commandservices.profile_command_service import ProfileCommandService
-from src.profile.infrastructure.dependencies import (get_profile_command_service,get_profile_repository,)
+from src.profile.infrastructure.dependencies import (
+    get_profile_command_service,
+    get_profile_repository,
+)
 from src.profile.interfaces.dto.profile_dto import ProfileResponseDTO
-from src.profile.interfaces.dto.create_profile_request_dto import CreateProfileDTO
+from src.profile.interfaces.dto.user_registered_event_dto import UserRegisteredEventDTO
 from src.profile.interfaces.dto.update_profile_request_dto import UpdateProfileDTO
+from src.shared.infrastructure.dependencies import get_event_bus
+from src.shared.domain.events.event_bus import EventBus
+from src.iam.domain.events.user_registered_event import UserRegisteredEvent
+from src.iam.domain.model.value_objects.user_role import UserRole
 
 def _model_dump(model, **kwargs):
     """
@@ -27,14 +33,39 @@ class ProfileController:
         self.register_routes()
 
     def register_routes(self) -> None:
-        @self.router.post("",status_code=status.HTTP_201_CREATED,response_model=ProfileResponseDTO)
-        def create_profile(payload: CreateProfileDTO, service: ProfileCommandService = Depends(get_profile_command_service) ):
+        @self.router.post(
+            "",
+            status_code=status.HTTP_201_CREATED,
+            response_model=ProfileResponseDTO,
+        )
+        def create_profile_via_event(
+            payload: UserRegisteredEventDTO,
+            event_bus: EventBus = Depends(get_event_bus),
+            repository: ProfileRepository = Depends(get_profile_repository),
+        ):
+            """
+            Testing helper endpoint that simulates IAM's UserRegisteredEvent.
+            """
             try:
-                command = CreateProfileCommand.from_primitives(**_model_dump(payload))
-                profile = service.create_profile(command)
-                return ProfileResponseDTO.from_domain(profile)
+                role = UserRole(payload.role.lower())
             except ValueError as exc:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+                allowed = ", ".join(role.value for role in UserRole)
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid role '{payload.role}'. Allowed: {allowed}.",
+                ) from exc
+
+            event = UserRegisteredEvent(user_id=payload.user_id, role=role)
+            event_bus.publish(event)
+
+            profile = repository.find_by_user_id(payload.user_id)
+            if not profile:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Profile was not created after publishing event.",
+                )
+
+            return ProfileResponseDTO.from_domain(profile)
 
         @self.router.put("/{user_id}",  response_model=ProfileResponseDTO )
         def update_profile( user_id: str, payload: UpdateProfileDTO, service: ProfileCommandService = Depends(get_profile_command_service) ):

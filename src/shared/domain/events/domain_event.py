@@ -1,10 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import field,dataclass
 from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
-
-@dataclass(frozen=True, slots=True)
+@dataclass
 class DomainEvent:
     """
     Base class for domain events that captures identity and occurrence metadata.

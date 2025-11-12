@@ -7,7 +7,13 @@ class ProfileModel(Base):
     __tablename__ = "profiles"
 
     id = Column(String(50), primary_key=True)
-    user_id = Column(String(50), nullable=False, unique=True, index=True)
+    user_id = Column(
+        String(50),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
     nutritionist_id = Column(
         String(50),
         ForeignKey("users.id"),
