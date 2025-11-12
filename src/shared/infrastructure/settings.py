@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     AUTH0_CLIENT_SECRET: str
     AUTH0_AUDIENCE: str
     AUTH0_ALGORITHMS: str
+    GPT_API_KEY: str
 
     class Config:
         env_file = ".env"
