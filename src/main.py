@@ -2,9 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
 import logging
-from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
 from src.meal_recognition.interfaces.rest.food_recognition_controller import MealRecognitionController
-from src.shared.infrastructure.persistence.sqlalchemy.engine import Base,engine
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.profile.application.internal.eventhandlers import register_profile_event_handlers
 
@@ -16,7 +14,6 @@ from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0Mac
 from src.iam.interfaces.rest.hello_controller import HelloController
 from src.iam.interfaces.rest.auth_controller import router as auth_router
 from src.profile.interfaces.rest.profile_controller import ProfileController
-from src.iam.interfaces.rest.auth_controller import AuthController
 from src.payments.interfaces.rest.payment_controller import router as payments_router
 
 
@@ -67,13 +64,8 @@ app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(profile_controller.router, prefix=API_PREFIX)
 
-
 meal_controller = MealRecognitionController()
 app.include_router(meal_controller.router)
-# Rutas de IAM
-app.include_router(hello_controller.router, prefix=API_PREFIX)
-# Si tienes AuthController también puedes registrar:
-# app.include_router(AuthController().router, prefix=API_PREFIX)
 
 # Rutas de Pagos (Culqi)
 app.include_router(payments_router, prefix=API_PREFIX)

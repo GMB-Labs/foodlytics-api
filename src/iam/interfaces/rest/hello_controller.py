@@ -15,26 +15,26 @@ class HelloController:
         self.register_routes()
 
     def register_routes(self):
-        @self.router.get("/token")
+        @self.router.get("/token", operation_id="hello_get_machine_token")
         def get_machine_token():
             return self.auth_service.get_machine_token()
 
-        @self.router.get("/me")
+        @self.router.get("/me", operation_id="hello_get_me")
         def get_me(
             payload=Depends(get_token_validation_service().verify_token),
             token_service: TokenValidationService = Depends(get_token_validation_service),
         ):
             return token_service.get_authenticated_user(payload)
 
-        @self.router.get("/patient-area")
+        @self.router.get("/patient-area", operation_id="hello_patient_area")
         def patient_area(payload=Depends(get_token_validation_service().require_scope("patient"))):
             return {"message": "Área del paciente"}
 
-        @self.router.get("/nutritionist-area")
+        @self.router.get("/nutritionist-area", operation_id="hello_nutritionist_area")
         def nutritionist_area(payload=Depends(get_token_validation_service().require_scope("nutritionist"))):
             return {"message": "Área del nutricionista"}
 
-        @self.router.get("/records")
+        @self.router.get("/records", operation_id="hello_get_records")
         def get_records(
                 payload=Depends(get_token_validation_service().require_scope("read:diet")),
                 _: dict = Depends(get_token_validation_service().require_scope("patient")),
