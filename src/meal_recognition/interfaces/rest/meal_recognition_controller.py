@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from src.meal_recognition.interfaces.dto.meal_recognition_request_dto import MealRecognitionRequestDTO
-from src.meal_recognition.interfaces.dto.meal_recognition_response_dto import MealRecognitionResponseDTO
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from src.meal_recognition.application.recognize_meal import MealRecognitionService
-from src.shared.infrastructure.settings import Settings
+from src.meal_recognition.interfaces.dto.meal_recognition_response_dto import MealRecognitionResponseDTO
+
 
 def get_meal_recognition_service():
-    # Lo ideal es montarlo con settings (pydantic-settings)
     return MealRecognitionService()
+
 
 class MealRecognitionController:
     def __init__(self):
@@ -19,11 +18,12 @@ class MealRecognitionController:
             response_model=MealRecognitionResponseDTO,
             status_code=status.HTTP_200_OK
         )
-        def analyze_meal(
-            body: MealRecognitionRequestDTO,
-            service: MealRecognitionService = Depends(get_meal_recognition_service)
+        async def analyze_meal(
+            image: UploadFile = File(...),
+            service: MealRecognitionService = Depends(get_meal_recognition_service),
         ):
-            data = service.analyze_meal(body.image_url)
+            image_bytes = await image.read()
+            data = service.analyze_meal(image_bytes)
 
             if "error" in data:
                 raise HTTPException(
