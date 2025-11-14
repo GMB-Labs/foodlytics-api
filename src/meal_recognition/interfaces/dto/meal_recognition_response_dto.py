@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 
 class MealItemDTO(BaseModel):
@@ -12,4 +12,5 @@ class MealItemDTO(BaseModel):
 
 
 class MealRecognitionResponseDTO(BaseModel):
+    dish_name: str
     items: List[MealItemDTO]

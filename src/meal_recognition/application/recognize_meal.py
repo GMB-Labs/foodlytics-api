@@ -21,27 +21,14 @@ class MealRecognitionService:
 
         prompt = """
         Devuelve únicamente JSON crudo, sin markdown y sin comentarios.
-        
-        Debes identificar todos los alimentos presentes en la imagen.  
-        Si el plato contiene múltiples componentes (por ejemplo: pollo a la brasa, papas fritas, ensalada), debes separarlos en elementos individuales dentro del arreglo "items".
-        
-        Por cada alimento detectado devuelve:
-        
-        - name: nombre del alimento en español.
-        - approximate_weight: peso aproximado en gramos del alimento detectado.
-        - kcal_per_gram: calorías por gramo (valor nutricional estándar).
-        - protein_per_gram: gramos de proteína por gramo.
-        - carbs_per_gram: gramos de carbohidratos por gramo.
-        - fats_per_gram: gramos de grasa por gramo.
-        
-        Reglas:
-        - Los valores nutricionales deben ser por gramo, no totales.
-        - No incluyas unidades.
-        - Todos los números deben ser valores numéricos puros.
-        - El nombre debe estar siempre en español.
-        - El JSON debe seguir exactamente esta estructura:
-        
+
+        Objetivo:
+        Identificar el plato principal en la imagen y listar cada uno de sus componentes por separado.
+
+        Estructura del JSON existente:
+
         {
+          "dish_name": string,
           "items": [
             {
               "name": string,
@@ -54,6 +41,13 @@ class MealRecognitionService:
           ]
         }
 
+        Reglas:
+        - "dish_name" debe ser el nombre del plato completo en español.
+        - "items" debe contener cada componente separado.
+        - approximate_weight es el peso estimado en gramos.
+        - Valores nutricionales son por gramo.
+        - No incluyas unidades.
+        - Devuelve solo JSON limpio.
         """
 
         try:
