@@ -14,3 +14,10 @@ SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False
 )
+"""
+
+def get_session_factory():
+    
+    return SessionFactory
+
+"""
