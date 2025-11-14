@@ -20,26 +20,40 @@ class MealRecognitionService:
         b64 = base64.b64encode(image_bytes).decode()
 
         prompt = """
-            Return strictly raw JSON without markdown fences.
-
-            Keep this EXACT schema:
-
+        Devuelve únicamente JSON crudo, sin markdown y sin comentarios.
+        
+        Debes identificar todos los alimentos presentes en la imagen.  
+        Si el plato contiene múltiples componentes (por ejemplo: pollo a la brasa, papas fritas, ensalada), debes separarlos en elementos individuales dentro del arreglo "items".
+        
+        Por cada alimento detectado devuelve:
+        
+        - name: nombre del alimento en español.
+        - approximate_weight: peso aproximado en gramos del alimento detectado.
+        - kcal_per_gram: calorías por gramo (valor nutricional estándar).
+        - protein_per_gram: gramos de proteína por gramo.
+        - carbs_per_gram: gramos de carbohidratos por gramo.
+        - fats_per_gram: gramos de grasa por gramo.
+        
+        Reglas:
+        - Los valores nutricionales deben ser por gramo, no totales.
+        - No incluyas unidades.
+        - Todos los números deben ser valores numéricos puros.
+        - El nombre debe estar siempre en español.
+        - El JSON debe seguir exactamente esta estructura:
+        
+        {
+          "items": [
             {
               "name": string,
               "approximate_weight": number,
-              "kcal": number,
-              "protein": number,
-              "carbs": number,
-              "fats": number
+              "kcal_per_gram": number,
+              "protein_per_gram": number,
+              "carbs_per_gram": number,
+              "fats_per_gram": number
             }
+          ]
+        }
 
-            Rules:
-            - "name" MUST be the food name in SPANISH.
-            - approximate_weight MUST ALWAYS be 1.
-            - kcal, protein, carbs and fats MUST be nutritional values PER 1 GRAM.
-            - Do NOT estimate total weight.
-            - Do NOT include units.
-            - All numeric values must be plain numbers.
         """
 
         try:
