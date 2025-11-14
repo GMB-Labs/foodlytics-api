@@ -6,7 +6,7 @@ class SqlAlchemyMealRepository(MealRepository):
     def __init__(self, session):
         self.session = session
 
-    def save(self, meal: Meal) -> None:
+    def save(self, meal: Meal) -> Meal:
         model = MealModel(
             id=meal.id,
             name=meal.name,
@@ -19,3 +19,4 @@ class SqlAlchemyMealRepository(MealRepository):
         )
         self.session.add(model)
         self.session.commit()
+        return meal

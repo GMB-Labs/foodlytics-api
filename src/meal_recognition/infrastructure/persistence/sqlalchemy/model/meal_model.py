@@ -1,8 +1,6 @@
 from sqlalchemy import Column, String, Float, DateTime
-from sqlalchemy.orm import declarative_base
 from datetime import datetime
-
-Base = declarative_base()
+from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
 
 class MealModel(Base):
     __tablename__ = "meals"
