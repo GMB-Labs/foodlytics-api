@@ -20,26 +20,34 @@ class MealRecognitionService:
         b64 = base64.b64encode(image_bytes).decode()
 
         prompt = """
-            Return strictly raw JSON without markdown fences.
+        Devuelve únicamente JSON crudo, sin markdown y sin comentarios.
 
-            Keep this EXACT schema:
+        Objetivo:
+        Identificar el plato principal en la imagen y listar cada uno de sus componentes por separado.
 
+        Estructura del JSON existente:
+
+        {
+          "dish_name": string,
+          "items": [
             {
               "name": string,
               "approximate_weight": number,
-              "kcal": number,
-              "protein": number,
-              "carbs": number,
-              "fats": number
+              "kcal_per_gram": number,
+              "protein_per_gram": number,
+              "carbs_per_gram": number,
+              "fats_per_gram": number
             }
+          ]
+        }
 
-            Rules:
-            - "name" MUST be the food name in SPANISH.
-            - approximate_weight MUST ALWAYS be 1.
-            - kcal, protein, carbs and fats MUST be nutritional values PER 1 GRAM.
-            - Do NOT estimate total weight.
-            - Do NOT include units.
-            - All numeric values must be plain numbers.
+        Reglas:
+        - "dish_name" debe ser el nombre del plato completo en español.
+        - "items" debe contener cada componente separado.
+        - approximate_weight es el peso estimado en gramos.
+        - Valores nutricionales son por gramo.
+        - No incluyas unidades.
+        - Devuelve solo JSON limpio.
         """
 
         try:

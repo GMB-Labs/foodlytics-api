@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
 import logging
-from src.meal_recognition.interfaces.rest.meal_recognition_controller import MealRecognitionController
+from src.meal_recognition.interfaces.rest.meal_controller import MealRecognitionController
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.profile.application.internal.eventhandlers import register_profile_event_handlers
 
