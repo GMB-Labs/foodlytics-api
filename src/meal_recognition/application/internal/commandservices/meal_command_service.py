@@ -1,19 +1,30 @@
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+
 from src.meal_recognition.domain.model.entities.meal import Meal
-from src.meal_recognition.domain.repository.meal_repository import MealRepository
+from src.meal_recognition.interfaces.dto.register_meal_request_dto import RegisterMealRequestDTO
+
+
+PERU_TZ = timezone(timedelta(hours=-5))
+
 
 class MealCommandService:
+    def __init__(self, repository):
+        self.repository = repository
 
-    def __init__(self, meal_repository: MealRepository):
-        self.meal_repository = meal_repository
+    def save_recognized_meal(self, dto: RegisterMealRequestDTO):
+        peru_now = datetime.now(PERU_TZ).replace(tzinfo=None)
 
-    def save_recognized_meal(self, dto):
-        meal = Meal.create(
+        meal = Meal(
+            id=str(uuid4()),
             name=dto.name,
-            approx_w=dto.approximate_weight_in_grams,
+            patient_id=dto.patient_id,
+            mealType=dto.meal_t,
             kcal=dto.kcal,
             protein=dto.protein,
             carbs=dto.carbs,
             fats=dto.fats,
+            uploaded_at=peru_now
         )
-        self.meal_repository.save(meal)
-        return meal
+
+        return self.repository.save(meal)

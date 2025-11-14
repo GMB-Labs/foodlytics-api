@@ -36,6 +36,8 @@ logging.basicConfig(
 # Crear todas las tablas definidas en los modelos Base
 Base.metadata.create_all(bind=engine)
 
+
+
 # ==============================================
 #  Configuración de CORS (solo desarrollo)
 # ==============================================
@@ -65,7 +67,7 @@ app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(profile_controller.router, prefix=API_PREFIX)
 
 meal_controller = MealRecognitionController()
-app.include_router(meal_controller.router)
+app.include_router(meal_controller.router,prefix=API_PREFIX)
 
 # Rutas de Pagos (Culqi)
 app.include_router(payments_router, prefix=API_PREFIX)

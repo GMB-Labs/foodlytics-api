@@ -7,6 +7,7 @@ engine = create_engine(
     echo=False,
     future=True
 )
+
 Base = declarative_base()
 
 SessionLocal = sessionmaker(
@@ -14,10 +15,3 @@ SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False
 )
-"""
-
-def get_session_factory():
-    
-    return SessionFactory
-
-"""
