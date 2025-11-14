@@ -12,5 +12,5 @@ class MealRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_day(self, day: date) -> List[Meal]:
+    def get_by_day_and_user(self, day: date, user_id: str) -> List[Meal]:
         pass

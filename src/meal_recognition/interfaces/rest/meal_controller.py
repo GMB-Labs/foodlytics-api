@@ -77,10 +77,11 @@ class MealRecognitionController:
         )
         def get_meals_by_day(
             day: date = Query(..., description="Fecha en formato YYYY-MM-DD"),
+            user_id: str = Query(..., description="ID del usuario"),
             repo = Depends(get_meal_repository)
         ):
             service = MealQueryService(repo)
-            meals = service.get_by_day(day)
+            meals = service.get_by_day(day, user_id)
             return [
                 MealResponseDTO(
                     id=meal.id,

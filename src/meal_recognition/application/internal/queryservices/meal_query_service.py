@@ -9,5 +9,5 @@ class MealQueryService:
     def __init__(self, repository: MealRepository):
         self.repository = repository
 
-    def get_by_day(self, day: date) -> List[Meal]:
-        return self.repository.get_by_day(day)
+    def get_by_day(self, day: date, user_id: str) -> List[Meal]:
+        return self.repository.get_by_day_and_user(day, user_id)

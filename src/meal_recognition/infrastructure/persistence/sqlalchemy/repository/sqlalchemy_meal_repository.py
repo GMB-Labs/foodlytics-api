@@ -27,7 +27,7 @@ class SqlAlchemyMealRepository(MealRepository):
         self.session.commit()
         return meal
 
-    def get_by_day(self, day: date) -> List[Meal]:
+    def get_by_day_and_user(self, day: date, user_id: str) -> List[Meal]:
         start_of_day = datetime.combine(day, time.min)
         end_of_day = start_of_day + timedelta(days=1)
         records = (
@@ -35,6 +35,7 @@ class SqlAlchemyMealRepository(MealRepository):
             .filter(
                 MealModel.uploaded_at >= start_of_day,
                 MealModel.uploaded_at < end_of_day,
+                MealModel.patient_id == user_id,
             )
             .order_by(MealModel.uploaded_at.asc())
             .all()
