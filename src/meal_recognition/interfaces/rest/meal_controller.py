@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from datetime import date
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 
 from src.meal_recognition.application.internal.commandservices.meal_command_service import MealCommandService
+from src.meal_recognition.application.internal.queryservices.meal_query_service import MealQueryService
 from src.meal_recognition.application.recognize_meal import MealRecognitionService
 from src.meal_recognition.interfaces.dto.meal_recognition_response_dto import MealRecognitionResponseDTO
+from src.meal_recognition.interfaces.dto.meal_response_dto import MealResponseDTO
 from src.meal_recognition.interfaces.dto.register_meal_request_dto import RegisterMealRequestDTO
 from src.meal_recognition.infrastructure.persistence.sqlalchemy.repository.sqlalchemy_meal_repository import SqlAlchemyMealRepository
 from src.shared.infrastructure.persistence.sqlalchemy.session import get_db
@@ -64,3 +69,29 @@ class MealRecognitionController:
                 "id": meal.id,
                 "uploaded_at": meal.uploaded_at
             }
+
+        @self.router.get(
+            "",
+            response_model=List[MealResponseDTO],
+            status_code=status.HTTP_200_OK
+        )
+        def get_meals_by_day(
+            day: date = Query(..., description="Fecha en formato YYYY-MM-DD"),
+            repo = Depends(get_meal_repository)
+        ):
+            service = MealQueryService(repo)
+            meals = service.get_by_day(day)
+            return [
+                MealResponseDTO(
+                    id=meal.id,
+                    name=meal.name,
+                    patient_id=meal.patient_id,
+                    meal_t=meal.mealType,
+                    kcal=meal.kcal,
+                    protein=meal.protein,
+                    carbs=meal.carbs,
+                    fats=meal.fats,
+                    uploaded_at=meal.uploaded_at
+                )
+                for meal in meals
+            ]

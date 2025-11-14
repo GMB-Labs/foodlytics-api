@@ -10,7 +10,7 @@ from src.meal_recognition.domain.model.valueobjects.meal_type import MealType
 class Meal:
     id: str
     name: Optional[str]
-    approximate_weight_in_grams: Optional[float]
+    patient_id: str
     mealType: MealType
     kcal: Optional[float]
     protein: Optional[float]
@@ -21,7 +21,7 @@ class Meal:
     @staticmethod
     def create(
         name: str,
-        approx_w: float,
+        patient_id: str,
         meal_t: MealType,
         kcal: float,
         protein: float,
@@ -31,7 +31,7 @@ class Meal:
         return Meal(
             id=str(uuid4()),
             name=name,
-            approximate_weight_in_grams=approx_w,
+            patient_id=patient_id,
             mealType=meal_t,
             kcal=kcal,
             protein=protein,

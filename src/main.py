@@ -36,6 +36,22 @@ logging.basicConfig(
 # Crear todas las tablas definidas en los modelos Base
 Base.metadata.create_all(bind=engine)
 
+
+def ensure_meal_columns():
+    inspector = inspect(engine)
+    if "meals" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("meals")}
+    with engine.begin() as conn:
+        if "meal_type" not in columns:
+            conn.execute(text("ALTER TABLE meals ADD COLUMN meal_type VARCHAR"))
+        if "patient_id" not in columns:
+            conn.execute(text("ALTER TABLE meals ADD COLUMN patient_id VARCHAR"))
+
+
+ensure_meal_columns()
+
 # ==============================================
 #  Configuración de CORS (solo desarrollo)
 # ==============================================
