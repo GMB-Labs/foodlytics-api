@@ -20,16 +20,27 @@ class MealRecognitionService:
         b64 = base64.b64encode(image_bytes).decode()
 
         prompt = """
-Return strictly JSON without markdown fences:
-{
-  "name": string,
-  "approximate_weight": number,
-  "kcal": number,
-  "protein": number,
-  "carbs": number,
-  "fats": number
-}
-"""
+            Return strictly raw JSON without markdown fences.
+
+            Keep this EXACT schema:
+
+            {
+              "name": string,
+              "approximate_weight": number,
+              "kcal": number,
+              "protein": number,
+              "carbs": number,
+              "fats": number
+            }
+
+            Rules:
+            - "name" MUST be the food name in SPANISH.
+            - approximate_weight MUST ALWAYS be 1.
+            - kcal, protein, carbs and fats MUST be nutritional values PER 1 GRAM.
+            - Do NOT estimate total weight.
+            - Do NOT include units.
+            - All numeric values must be plain numbers.
+        """
 
         try:
             response = self.client.chat.completions.create(
