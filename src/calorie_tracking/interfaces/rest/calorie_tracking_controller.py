@@ -38,7 +38,9 @@ class CalorieTrackingController:
             service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
         ):
             try:
-                summary = service.get_daily_summary(patient_id=patient_id, day=day)
+                summary = service.get_daily_summary(
+                    patient_id=patient_id, day=day
+                )
                 return summary
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -54,7 +56,9 @@ class CalorieTrackingController:
             service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
         ):
             try:
-                summary = service.finalize_day(patient_id=patient_id, day=day)
+                summary = service.finalize_day(
+                    patient_id=patient_id, day=day
+                )
                 return {
                     "day": day,
                     "patient_id": patient_id,
@@ -77,6 +81,8 @@ class CalorieTrackingController:
                         "fats": summary.target_fats - summary.consumed_fats,
                     },
                     "status": summary.status,
+                    "activity_burned": getattr(summary, "activity_burned", 0),
+                    "net_calories": summary.consumed_calories,
                 }
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
