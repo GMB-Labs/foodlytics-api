@@ -26,6 +26,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
             consumed_protein=model.consumed_protein,
             consumed_carbs=model.consumed_carbs,
             consumed_fats=model.consumed_fats,
+            activity_burned=model.activity_burned,
             status=model.status,
             created_at=model.created_at,
             updated_at=model.updated_at,
@@ -42,6 +43,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
         model.consumed_protein = entity.consumed_protein
         model.consumed_carbs = entity.consumed_carbs
         model.consumed_fats = entity.consumed_fats
+        model.activity_burned = entity.activity_burned
         model.status = entity.status
         model.created_at = entity.created_at
         model.updated_at = entity.updated_at

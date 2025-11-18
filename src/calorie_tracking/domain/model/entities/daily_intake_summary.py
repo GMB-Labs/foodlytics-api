@@ -16,6 +16,7 @@ class DailyIntakeSummary:
     consumed_protein: float
     consumed_carbs: float
     consumed_fats: float
+    activity_burned: float
     status: str
     created_at: datetime
     updated_at: datetime
@@ -34,6 +35,7 @@ class DailyIntakeSummary:
         consumed_protein: float,
         consumed_carbs: float,
         consumed_fats: float,
+        activity_burned: float,
         status: str,
     ) -> "DailyIntakeSummary":
         now = datetime.now(timezone.utc)
@@ -48,6 +50,7 @@ class DailyIntakeSummary:
             consumed_protein=consumed_protein,
             consumed_carbs=consumed_carbs,
             consumed_fats=consumed_fats,
+            activity_burned=activity_burned,
             status=status,
             created_at=now,
             updated_at=now,
@@ -64,6 +67,7 @@ class DailyIntakeSummary:
         consumed_protein: float,
         consumed_carbs: float,
         consumed_fats: float,
+        activity_burned: float,
         status: str,
     ) -> None:
         self.target_calories = target_calories
@@ -74,5 +78,6 @@ class DailyIntakeSummary:
         self.consumed_protein = consumed_protein
         self.consumed_carbs = consumed_carbs
         self.consumed_fats = consumed_fats
+        self.activity_burned = activity_burned
         self.status = status
         self.updated_at = datetime.now(timezone.utc)

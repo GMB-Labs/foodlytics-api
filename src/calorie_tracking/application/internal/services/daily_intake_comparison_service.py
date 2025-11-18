@@ -23,25 +23,40 @@ class DailyIntakeComparisonService:
         self.target_service = target_service
         self.summary_repository = summary_repository
 
-    def get_daily_summary(self, *, patient_id: str, day: date) -> Dict:
+    def _current_activity_burned(self, patient_id: str, day: date) -> float:
+        if not self.summary_repository:
+            return 0.0
+        existing = self.summary_repository.find_by_patient_and_day(patient_id, day)
+        if not existing:
+            return 0.0
+        return getattr(existing, "activity_burned", 0.0) or 0.0
+
+    def get_daily_summary(
+        self, *, patient_id: str, day: date, activity_burned: float | None = None
+    ) -> Dict:
         target = self.target_service.get_by_patient(patient_id)
         if not target:
             raise ValueError("Calorie target not found for this patient.")
 
+        if activity_burned is None:
+            activity_burned = self._current_activity_burned(patient_id, day)
+
         meals: List[Meal] = self.meal_repository.get_by_day_and_user(day, patient_id)
 
         totals = self._aggregate_meals(meals)
+        net_calories = max(totals["calories"] - (activity_burned or 0), 0)
+        diff_calories = target.calories - net_calories
         diff = {
-            "calories": target.calories - totals["calories"],
+            "calories": diff_calories,
             "protein": target.protein_grams - totals["protein"],
             "carbs": target.carb_grams - totals["carbs"],
             "fats": target.fat_grams - totals["fats"],
         }
 
         status = "within_target"
-        if totals["calories"] > target.calories:
+        if net_calories > target.calories:
             status = "over_target"
-        elif totals["calories"] < target.calories * 0.9:
+        elif net_calories < target.calories * 0.9:
             status = "under_target"
 
         return {
@@ -55,16 +70,26 @@ class DailyIntakeComparisonService:
             },
             "consumed": totals,
             "difference": diff,
+            "activity_burned": activity_burned,
+            "net_calories": net_calories,
             "status": status,
         }
 
-    def finalize_day(self, *, patient_id: str, day: date) -> DailyIntakeSummary:
+    def finalize_day(
+        self, *, patient_id: str, day: date, activity_burned: float = 0.0
+    ) -> DailyIntakeSummary:
         if not self.summary_repository:
             raise RuntimeError("DailyIntakeSummaryRepository is not configured.")
 
-        summary_dict = self.get_daily_summary(patient_id=patient_id, day=day)
+        existing_burn = self._current_activity_burned(patient_id, day)
+        total_activity_burned = existing_burn + activity_burned
+
+        summary_dict = self.get_daily_summary(
+            patient_id=patient_id, day=day, activity_burned=total_activity_burned
+        )
         target = summary_dict["target"]
         consumed = summary_dict["consumed"]
+        net_calories = summary_dict.get("net_calories", consumed["calories"])
 
         entity = self.summary_repository.find_by_patient_and_day(patient_id, day)
         if entity:
@@ -73,10 +98,11 @@ class DailyIntakeComparisonService:
                 target_protein=target["protein"],
                 target_carbs=target["carbs"],
                 target_fats=target["fats"],
-                consumed_calories=consumed["calories"],
+                consumed_calories=net_calories,
                 consumed_protein=consumed["protein"],
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
+                activity_burned=total_activity_burned,
                 status=summary_dict["status"],
             )
         else:
@@ -87,10 +113,11 @@ class DailyIntakeComparisonService:
                 target_protein=target["protein"],
                 target_carbs=target["carbs"],
                 target_fats=target["fats"],
-                consumed_calories=consumed["calories"],
+                consumed_calories=net_calories,
                 consumed_protein=consumed["protein"],
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
+                activity_burned=total_activity_burned,
                 status=summary_dict["status"],
             )
 

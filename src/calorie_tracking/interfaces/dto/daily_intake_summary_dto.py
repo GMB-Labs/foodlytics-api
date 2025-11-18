@@ -16,3 +16,5 @@ class DailyIntakeSummaryDTO(BaseModel):
     consumed: MacroBreakdownDTO
     difference: MacroBreakdownDTO
     status: str
+    activity_burned: float = 0
+    net_calories: float | None = None
