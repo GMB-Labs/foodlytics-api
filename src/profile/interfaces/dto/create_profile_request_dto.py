@@ -12,3 +12,9 @@ class CreateProfileDTO(BaseModel):
     weight_kg: float = Field(..., gt=0)
     gender: str = Field(..., description="Allowed values: male, female, other.")
     goal_type: str = Field(..., description="Allowed values: definition, maintenance, bulking.")
+    activity_level: str | None = Field(
+        None, description="sedentary, light, active, very_active. Opcional."
+    )
+    desired_weight_kg: float | None = Field(
+        None, gt=0, description="Peso objetivo opcional en kg."
+    )

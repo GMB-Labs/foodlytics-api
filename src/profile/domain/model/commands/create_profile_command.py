@@ -3,6 +3,7 @@ from typing import Optional
 
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
+from src.profile.domain.model.value_objects.activity_level import ActivityLevel
 
 
 @dataclass(slots=True)
@@ -20,6 +21,8 @@ class CreateProfileCommand:
     weight_kg: float
     gender: Gender
     goal_type: GoalType
+    activity_level: ActivityLevel | None = None
+    desired_weight_kg: float | None = None
 
     @classmethod
     def from_primitives(
@@ -34,6 +37,8 @@ class CreateProfileCommand:
         weight_kg: float,
         gender: str,
         goal_type: str,
+        activity_level: str | None = None,
+        desired_weight_kg: float | None = None,
     ) -> "CreateProfileCommand":
         """
         Helper factory that accepts raw strings (e.g. payloads) and converts them into value objects.
@@ -48,4 +53,6 @@ class CreateProfileCommand:
             weight_kg=weight_kg,
             gender=Gender.from_string(gender),
             goal_type=GoalType.from_string(goal_type),
+            activity_level=ActivityLevel.from_string(activity_level) if activity_level else None,
+            desired_weight_kg=desired_weight_kg,
         )

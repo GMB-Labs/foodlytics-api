@@ -13,6 +13,7 @@ from src.profile.domain.model.commands.create_profile_command import CreateProfi
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
 from src.profile.infrastructure.persistance.sqlalchemy.repositories.sqlalchemy_profile_repository import SqlAlchemyProfileRepository
+from src.shared.infrastructure.dependencies import get_event_bus
 from src.shared.infrastructure.persistence.sqlalchemy.engine import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -52,9 +53,11 @@ class UserRegisteredEventHandler:
                 weight_kg=self.default_weight_kg,
                 gender=self.default_gender,
                 goal_type=self.default_goal,
+                activity_level=None,
+                desired_weight_kg=None,
             )
 
-            service = ProfileCommandService(repository)
+            service = ProfileCommandService(repository, get_event_bus())
             service.create_profile(command)
             logger.info("Profile bootstrap completed for user '%s'", event.user_id)
         finally:

@@ -6,6 +6,7 @@ from src.profile.domain.model.commands.update_profile_command import UpdateProfi
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
 from src.profile.domain.model.value_objects.profile_picture import ProfilePicture
+from src.profile.domain.model.value_objects.activity_level import ActivityLevel
 from src.shared.domain.model.aggregates.auditable_aggregate_root import AuditableAbstractAggregateRoot
 
 
@@ -20,6 +21,8 @@ class Profile(AuditableAbstractAggregateRoot):
     weight_kg: float
     gender: Gender
     goal_type: GoalType
+    activity_level: ActivityLevel | None
+    desired_weight_kg: float | None
 
     def __init__(
         self,
@@ -33,6 +36,8 @@ class Profile(AuditableAbstractAggregateRoot):
         weight_kg: float,
         gender: Gender,
         goal_type: GoalType,
+        activity_level: ActivityLevel | None = None,
+        desired_weight_kg: float | None = None,
         profile_picture: Optional[ProfilePicture] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
@@ -48,6 +53,8 @@ class Profile(AuditableAbstractAggregateRoot):
         self.weight_kg = weight_kg
         self.gender = gender
         self.goal_type = goal_type
+        self.activity_level = activity_level
+        self.desired_weight_kg = desired_weight_kg
         self._profile_picture: Optional[ProfilePicture] = profile_picture
 
         if created_at:
@@ -67,6 +74,8 @@ class Profile(AuditableAbstractAggregateRoot):
             weight_kg=command.weight_kg,
             gender=command.gender,
             goal_type=command.goal_type,
+            activity_level=command.activity_level,
+            desired_weight_kg=command.desired_weight_kg,
         )
 
     def apply_update(self, command: UpdateProfileCommand) -> None:
@@ -84,6 +93,10 @@ class Profile(AuditableAbstractAggregateRoot):
             self.gender = command.gender
         if command.goal_type is not None:
             self.goal_type = command.goal_type
+        if command.activity_level is not None:
+            self.activity_level = command.activity_level
+        if command.desired_weight_kg is not None:
+            self.desired_weight_kg = command.desired_weight_kg
         self._touch()
 
     def set_profile_picture(self, picture_data: bytes, mime_type: str) -> None:
