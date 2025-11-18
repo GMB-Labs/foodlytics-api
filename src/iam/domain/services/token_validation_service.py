@@ -8,7 +8,7 @@ class TokenValidationService(ABC):
         pass
 
     @abstractmethod
-    def require_scope(self, required_scope: str) -> Callable:
+    def require_role(self, required_role: str) -> Callable:
         pass
 
 

@@ -42,14 +42,19 @@ class Auth0TokenValidationServiceImpl(TokenValidationService):
         except Exception as e:
             raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
-    #TODO: add require_role
-    def require_scope(self, required_scope: str):
+    def require_role(self, required_role: str):
         def dependency(payload: Dict[str, Any] = Depends(self.verify_token)):
+            roles = payload.get("https://foodlytics.app/roles") or payload.get("roles") or []
+            if not isinstance(roles, list):
+                roles = [roles]
+
+            # Prefer role validation; fallback to scopes for backward compatibility
             scopes = payload.get("scope", "").split()
-            if required_scope not in scopes:
+
+            if required_role not in roles and required_role not in scopes:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Missing required scope: {required_scope}"
+                    detail=f"Missing required role: {required_role}"
                 )
             return payload
         return dependency

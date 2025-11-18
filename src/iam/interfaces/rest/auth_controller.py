@@ -19,7 +19,7 @@ router = APIRouter(prefix="/users-sync", tags=["UsersSync"])
 @router.post("/upsert")
 def upsert_user_from_action(
     body: AuthController,
-    _: Dict[str, Any] = Depends(get_token_validation_service().require_scope("sync:users")),
+    _: Dict[str, Any] = Depends(get_token_validation_service().require_role("sync:users")),
     service: UserService = Depends(get_user_service)
 ):
     payload = {
