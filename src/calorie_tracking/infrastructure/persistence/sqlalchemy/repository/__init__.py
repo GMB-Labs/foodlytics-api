@@ -1,0 +1,3 @@
+from src.calorie_tracking.infrastructure.persistence.sqlalchemy.repository.sqlalchemy_calorie_target_repository import SqlAlchemyCalorieTargetRepository
+
+__all__ = ["SqlAlchemyCalorieTargetRepository"]

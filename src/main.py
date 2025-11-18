@@ -5,6 +5,8 @@ import logging
 from src.meal_recognition.interfaces.rest.meal_controller import MealRecognitionController
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.profile.application.internal.eventhandlers import register_profile_event_handlers
+from src.calorie_tracking.application.internal.eventhandlers import register_calorie_tracking_event_handlers
+from src.calorie_tracking.interfaces.rest.calorie_tracking_controller import CalorieTrackingController
 
 # Importaciones internas
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base, engine
@@ -24,6 +26,7 @@ app = FastAPI(
     title='Foodlytics API',
     version='1.0',
     description='API for Foodlytics application',
+    # dependencies=[Depends(get_token_validation_service().verify_token)]
 )
 logging.getLogger("src.shared.infrastructure.events.in_memory_event_bus").setLevel(logging.DEBUG)
 
@@ -61,6 +64,7 @@ profile_controller = ProfileController()
 
 # register cross-context event handlers
 register_profile_event_handlers(get_event_bus())
+register_calorie_tracking_event_handlers(get_event_bus())
 
 app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
@@ -68,6 +72,8 @@ app.include_router(profile_controller.router, prefix=API_PREFIX)
 
 meal_controller = MealRecognitionController()
 app.include_router(meal_controller.router,prefix=API_PREFIX)
+calorie_controller = CalorieTrackingController()
+app.include_router(calorie_controller.router, prefix=API_PREFIX)
 
 # Rutas de Pagos (Culqi)
 app.include_router(payments_router, prefix=API_PREFIX)
