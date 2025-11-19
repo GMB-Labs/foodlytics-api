@@ -14,22 +14,8 @@ class AuthController(BaseModel):
     permissions: list[str] | None = []
 
 
-router = APIRouter(prefix="/users-sync", tags=["UsersSync"])
+router = APIRouter(prefix="/users-sync", tags=["Auth Controller"])
 
-@router.post("/upsert")
-def upsert_user_from_action(
-    body: AuthController,
-    _: Dict[str, Any] = Depends(get_token_validation_service().require_scope("sync:users")),
-    service: UserService = Depends(get_user_service)
-):
-    payload = {
-        "sub": body.sub,
-        "email": body.email,
-        "scope": body.scope or "",
-        "permissions": body.permissions or []
-    }
-    user = service.get_or_create_from_payload(payload)
-    return {"ok": True, "id": user.id}
 
 @router.post("/sync")
 def sync_user_from_token(

@@ -15,18 +15,13 @@ class  User(AuditableAbstractAggregateRoot):
     permissions: List[str]
 
     @classmethod
-    def from_auth0_payload(cls, payload: dict) -> "User":
+    def from_auth0_payload(cls, payload: dict, role: UserRole) -> "User":
         sub = payload.get("sub")
         email = payload.get("email")
         scope_raw = payload.get("scope", "")
         permissions = payload.get("permissions", [])
 
         scopes = scope_raw.split() if isinstance(scope_raw, str) else list(scope_raw)
-
-        if "nutritionist" in scopes or "nutritionist" in permissions:
-            role = UserRole.NUTRITIONIST
-        else:
-            role = UserRole.PATIENT
 
         username = email if email else sub
 

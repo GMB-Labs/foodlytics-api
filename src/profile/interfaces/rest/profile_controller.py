@@ -6,13 +6,19 @@ from src.profile.domain.model.commands.update_profile_command import UpdateProfi
 from src.profile.domain.model.commands.update_profile_picture_command import UpdateProfilePictureCommand
 from src.profile.domain.repositories.profile_repository import ProfileRepository
 from src.profile.application.internal.commandservices.profile_command_service import ProfileCommandService
+from src.profile.application.internal.services.nutritionist_invite_service import NutritionistInviteService
 from src.profile.infrastructure.dependencies import (
     get_profile_command_service,
     get_profile_repository,
+    get_nutritionist_invite_service,
 )
 from src.profile.interfaces.dto.profile_dto import ProfileResponseDTO
 from src.profile.interfaces.dto.user_registered_event_dto import UserRegisteredEventDTO
 from src.profile.interfaces.dto.update_profile_request_dto import UpdateProfileDTO
+from src.profile.interfaces.dto.nutritionist_invite_dto import (
+    GenerateInviteResponseDTO,
+    RedeemInviteRequestDTO,
+)
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.shared.domain.events.event_bus import EventBus
 from src.iam.domain.events.user_registered_event import UserRegisteredEvent
@@ -137,3 +143,30 @@ class ProfileController:
                 media_type=picture.mime_type,
                 headers={"Content-Disposition": f'inline; filename="{user_id}.img"'},
             )
+
+        @self.router.post(
+            "/nutritionists/{nutritionist_id}/invite-code",
+            response_model=GenerateInviteResponseDTO,
+            summary="Genera un código de 6 dígitos para que un paciente se asocie",
+        )
+        def generate_invite_code(
+            nutritionist_id: str,
+            service: NutritionistInviteService = Depends(get_nutritionist_invite_service),
+        ):
+            code = service.generate_code(nutritionist_id=nutritionist_id)
+            return {"code": code.code}
+
+        @self.router.post(
+            "/redeem-invite",
+            response_model=ProfileResponseDTO,
+            summary="Paciente ingresa el código y se asocia al nutricionista",
+        )
+        def redeem_invite(
+            payload: RedeemInviteRequestDTO,
+            service: NutritionistInviteService = Depends(get_nutritionist_invite_service),
+        ):
+            try:
+                profile = service.redeem_code(code=payload.code, patient_id=payload.patient_id)
+                return ProfileResponseDTO.from_domain(profile)
+            except ValueError as exc:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

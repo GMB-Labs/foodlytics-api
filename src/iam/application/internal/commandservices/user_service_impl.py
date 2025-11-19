@@ -2,6 +2,7 @@ from typing import Optional, Dict
 
 from src.iam.domain.events.user_registered_event import UserRegisteredEvent
 from src.iam.domain.model.aggregates.user import User as User
+from src.iam.domain.model.value_objects.user_role import UserRole
 from src.iam.domain.repositories.user_repository import UserRepository
 from src.iam.domain.services.user_service import UserService
 from src.shared.domain.events.event_bus import EventBus
@@ -23,20 +24,21 @@ class UserServiceImpl(UserService):
         """
         sub = payload.get("sub")
         email = payload.get("email")
+        role = self._resolve_role(payload)
 
         user = self.user_repository.find_by_auth0_id(sub)
         if not user and email:
             user = self.user_repository.find_by_email(email)
 
         if not user:
-            user = User.from_auth0_payload(payload)
+            user = User.from_auth0_payload(payload, role)
             self.user_repository.save(user)
             self._event_bus.publish(
                 UserRegisteredEvent(user_id=user.id, role=user.role)
             )
             return user
 
-        updated = User.from_auth0_payload(payload)
+        updated = User.from_auth0_payload(payload, role)
         updated.username = user.username or updated.username
 
         if user.id != updated.id:
@@ -52,3 +54,21 @@ class UserServiceImpl(UserService):
         :return:
         """
         return self.user_repository.find_by_id(user_id)
+
+    def _resolve_role(self, payload: Dict) -> UserRole:
+        custom_roles = payload.get("https://foodlytics.app/roles") or payload.get("roles")
+        if custom_roles is not None:
+            roles_list = custom_roles if isinstance(custom_roles, list) else [custom_roles]
+            for role_value in roles_list:
+                try:
+                    return UserRole(role_value)
+                except ValueError:
+                    continue
+
+        scope_raw = payload.get("scope", "")
+        permissions = payload.get("permissions", [])
+        scopes = scope_raw.split() if isinstance(scope_raw, str) else list(scope_raw)
+
+        if "nutritionist" in scopes or "nutritionist" in permissions:
+            return UserRole.NUTRITIONIST
+        return UserRole.PATIENT

@@ -10,7 +10,6 @@ class ProfileModel(Base):
     user_id = Column(
         String(50),
         ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
         unique=True,
         index=True,
     )
@@ -26,7 +25,10 @@ class ProfileModel(Base):
     height_cm = Column(Float, nullable=False)
     weight_kg = Column(Float, nullable=False)
     gender = Column(String(10), nullable=False)
-    goal_type = Column(String(50), nullable=False)
+    goal_type = Column(String(50), nullable=True)
+    activity_level = Column(String(20), nullable=True)
+    desired_weight_kg = Column(Float, nullable=True)
+    user_profile_completed = Column(Integer, nullable=False, default=0)
 
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
