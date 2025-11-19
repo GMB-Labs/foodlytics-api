@@ -36,9 +36,10 @@ class SqlAlchemyProfileRepository(ProfileRepository):
             height_cm=model.height_cm,
             weight_kg=model.weight_kg,
             gender=Gender.from_string(model.gender),
-            goal_type=GoalType.from_string(model.goal_type),
+            goal_type=GoalType.from_string(model.goal_type) if model.goal_type else None,
             activity_level=ActivityLevel.from_string(model.activity_level) if model.activity_level else None,
             desired_weight_kg=model.desired_weight_kg,
+            user_profile_completed=bool(model.user_profile_completed),
             profile_picture=picture,
             created_at=model.created_at,
             updated_at=model.updated_at,
@@ -57,6 +58,7 @@ class SqlAlchemyProfileRepository(ProfileRepository):
         model.goal_type = entity.goal_type.value
         model.activity_level = entity.activity_level.value if entity.activity_level else None
         model.desired_weight_kg = entity.desired_weight_kg
+        model.user_profile_completed = 1 if entity.user_profile_completed else 0
         model.created_at = entity.created_at
         model.updated_at = entity.updated_at
 

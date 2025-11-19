@@ -20,9 +20,10 @@ class Profile(AuditableAbstractAggregateRoot):
     height_cm: float
     weight_kg: float
     gender: Gender
-    goal_type: GoalType
+    goal_type: GoalType | None
     activity_level: ActivityLevel | None
     desired_weight_kg: float | None
+    user_profile_completed: bool
 
     def __init__(
         self,
@@ -38,6 +39,7 @@ class Profile(AuditableAbstractAggregateRoot):
         goal_type: GoalType,
         activity_level: ActivityLevel | None = None,
         desired_weight_kg: float | None = None,
+        user_profile_completed: bool = False,
         profile_picture: Optional[ProfilePicture] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
@@ -55,6 +57,7 @@ class Profile(AuditableAbstractAggregateRoot):
         self.goal_type = goal_type
         self.activity_level = activity_level
         self.desired_weight_kg = desired_weight_kg
+        self.user_profile_completed = user_profile_completed
         self._profile_picture: Optional[ProfilePicture] = profile_picture
 
         if created_at:
@@ -76,6 +79,7 @@ class Profile(AuditableAbstractAggregateRoot):
             goal_type=command.goal_type,
             activity_level=command.activity_level,
             desired_weight_kg=command.desired_weight_kg,
+            user_profile_completed=False,
         )
 
     def apply_update(self, command: UpdateProfileCommand) -> None:
@@ -97,6 +101,8 @@ class Profile(AuditableAbstractAggregateRoot):
             self.activity_level = command.activity_level
         if command.desired_weight_kg is not None:
             self.desired_weight_kg = command.desired_weight_kg
+        if command.user_profile_completed is not None:
+            self.user_profile_completed = command.user_profile_completed
         self._touch()
 
     def set_profile_picture(self, picture_data: bytes, mime_type: str) -> None:

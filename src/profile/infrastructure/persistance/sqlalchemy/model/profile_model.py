@@ -28,6 +28,7 @@ class ProfileModel(Base):
     goal_type = Column(String(50), nullable=True)
     activity_level = Column(String(20), nullable=True)
     desired_weight_kg = Column(Float, nullable=True)
+    user_profile_completed = Column(Integer, nullable=False, default=0)
 
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
