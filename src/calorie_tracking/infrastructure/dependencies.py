@@ -40,8 +40,9 @@ def get_daily_comparison_service(
     meal_repo: MealRepository = Depends(get_meal_repository),
     target_service: CalorieTargetService = Depends(get_calorie_target_service),
     summary_repo: DailyIntakeSummaryRepository = Depends(get_daily_intake_summary_repository),
+    profile_repo: ProfileRepository = Depends(get_profile_repository),
 ) -> DailyIntakeComparisonService:
-    return DailyIntakeComparisonService(meal_repo, target_service, summary_repo)
+    return DailyIntakeComparisonService(meal_repo, target_service, summary_repo, profile_repo)
 
 
 def get_nutritionist_daily_results_service(

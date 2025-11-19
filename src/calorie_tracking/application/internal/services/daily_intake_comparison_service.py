@@ -18,10 +18,12 @@ class DailyIntakeComparisonService:
         meal_repository: MealRepository,
         target_service: CalorieTargetService,
         summary_repository: DailyIntakeSummaryRepository | None = None,
+        profile_repository=None,
     ):
         self.meal_repository = meal_repository
         self.target_service = target_service
         self.summary_repository = summary_repository
+        self.profile_repository = profile_repository
 
     def _current_activity_burned(self, patient_id: str, day: date) -> float:
         if not self.summary_repository:
@@ -53,6 +55,8 @@ class DailyIntakeComparisonService:
             "fats": target.fat_grams - totals["fats"],
         }
 
+        bmi = self._calculate_bmi(patient_id)
+
         status = "within_target"
         if net_calories > target.calories:
             status = "over_target"
@@ -67,6 +71,7 @@ class DailyIntakeComparisonService:
                 "protein": target.protein_grams,
                 "carbs": target.carb_grams,
                 "fats": target.fat_grams,
+                "bmi": bmi,
             },
             "consumed": totals,
             "difference": diff,
@@ -74,6 +79,17 @@ class DailyIntakeComparisonService:
             "net_calories": net_calories,
             "status": status,
         }
+
+    def _calculate_bmi(self, patient_id: str) -> float | None:
+        if not self.profile_repository:
+            return None
+        profile = self.profile_repository.find_by_user_id(patient_id)
+        if not profile or not profile.weight_kg or not profile.height_cm:
+            return None
+        if profile.height_cm <= 0 or profile.weight_kg <= 0:
+            return None
+        height_m = profile.height_cm / 100
+        return round(profile.weight_kg / (height_m ** 2), 2)
 
     def finalize_day(
         self, *, patient_id: str, day: date, activity_burned: float = 0.0

@@ -7,6 +7,7 @@ class MacroBreakdownDTO(BaseModel):
     protein: float
     carbs: float
     fats: float
+    bmi: float | None = None
 
 
 class DailyIntakeSummaryDTO(BaseModel):

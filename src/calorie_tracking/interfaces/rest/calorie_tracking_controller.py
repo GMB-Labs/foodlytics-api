@@ -56,34 +56,9 @@ class CalorieTrackingController:
             service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
         ):
             try:
-                summary = service.finalize_day(
-                    patient_id=patient_id, day=day
-                )
-                return {
-                    "day": day,
-                    "patient_id": patient_id,
-                    "target": {
-                        "calories": summary.target_calories,
-                        "protein": summary.target_protein,
-                        "carbs": summary.target_carbs,
-                        "fats": summary.target_fats,
-                    },
-                    "consumed": {
-                        "calories": summary.consumed_calories,
-                        "protein": summary.consumed_protein,
-                        "carbs": summary.consumed_carbs,
-                        "fats": summary.consumed_fats,
-                    },
-                    "difference": {
-                        "calories": summary.target_calories - summary.consumed_calories,
-                        "protein": summary.target_protein - summary.consumed_protein,
-                        "carbs": summary.target_carbs - summary.consumed_carbs,
-                        "fats": summary.target_fats - summary.consumed_fats,
-                    },
-                    "status": summary.status,
-                    "activity_burned": getattr(summary, "activity_burned", 0),
-                    "net_calories": summary.consumed_calories,
-                }
+                view = service.get_daily_summary(patient_id=patient_id, day=day)
+                service.finalize_day(patient_id=patient_id, day=day)
+                return view
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
 
