@@ -83,26 +83,27 @@ class Profile(AuditableAbstractAggregateRoot):
         )
 
     def apply_update(self, command: UpdateProfileCommand) -> None:
-        if command.first_name is not None:
-            self.first_name = command.first_name
-        if command.last_name is not None:
-            self.last_name = command.last_name
-        if command.age is not None:
-            self.age = command.age
+        if not command.first_name or not command.last_name:
+            raise ValueError("First name and last name are required.")
+        if command.gender is None:
+            raise ValueError("Gender is required.")
+
+        self.first_name = command.first_name
+        self.last_name = command.last_name
+        self.age = command.age
+        self.gender = command.gender
+        self.user_profile_completed = command.user_profile_completed
+
         if command.height_cm is not None:
             self.height_cm = command.height_cm
         if command.weight_kg is not None:
             self.weight_kg = command.weight_kg
-        if command.gender is not None:
-            self.gender = command.gender
         if command.goal_type is not None:
             self.goal_type = command.goal_type
         if command.activity_level is not None:
             self.activity_level = command.activity_level
         if command.desired_weight_kg is not None:
             self.desired_weight_kg = command.desired_weight_kg
-        if command.user_profile_completed is not None:
-            self.user_profile_completed = command.user_profile_completed
         self._touch()
 
     def set_profile_picture(self, picture_data: bytes, mime_type: str) -> None:
