@@ -39,39 +39,6 @@ class ProfileController:
         self.register_routes()
 
     def register_routes(self) -> None:
-        @self.router.post(
-            "",
-            status_code=status.HTTP_201_CREATED,
-            response_model=ProfileResponseDTO,
-        )
-        def create_profile_via_event(
-            payload: UserRegisteredEventDTO,
-            event_bus: EventBus = Depends(get_event_bus),
-            repository: ProfileRepository = Depends(get_profile_repository),
-        ):
-            """
-            Testing helper endpoint that simulates IAM's UserRegisteredEvent.
-            """
-            try:
-                role = UserRole(payload.role.lower())
-            except ValueError as exc:
-                allowed = ", ".join(role.value for role in UserRole)
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid role '{payload.role}'. Allowed: {allowed}.",
-                ) from exc
-
-            event = UserRegisteredEvent(user_id=payload.user_id, role=role)
-            event_bus.publish(event)
-
-            profile = repository.find_by_user_id(payload.user_id)
-            if not profile:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Profile was not created after publishing event.",
-                )
-
-            return ProfileResponseDTO.from_domain(profile)
 
         @self.router.put("/{user_id}",  response_model=ProfileResponseDTO )
         def update_profile( user_id: str, payload: UpdateProfileDTO, service: ProfileCommandService = Depends(get_profile_command_service) ):
@@ -111,8 +78,11 @@ class ProfileController:
             return ProfileResponseDTO.from_domain(profile)
 
 
-        @self.router.get("",response_model=List[ProfileResponseDTO] )
+        @self.router.get("",response_model=List[ProfileResponseDTO],summary="TESTING" )
         def list_profiles( repository: ProfileRepository = Depends(get_profile_repository) ):
+            """
+            Testing endpoint to list all profiles (not for production use)
+            """
             profiles = repository.list_all()
             return [ProfileResponseDTO.from_domain(profile) for profile in profiles]
 
@@ -147,7 +117,7 @@ class ProfileController:
         @self.router.post(
             "/nutritionists/{nutritionist_id}/invite-code",
             response_model=GenerateInviteResponseDTO,
-            summary="Genera un código de 6 dígitos para que un paciente se asocie",
+            summary="Generates a code to invite patients to associate with the nutritionist",
         )
         def generate_invite_code(
             nutritionist_id: str,
@@ -159,7 +129,7 @@ class ProfileController:
         @self.router.post(
             "/redeem-invite",
             response_model=ProfileResponseDTO,
-            summary="Paciente ingresa el código y se asocia al nutricionista",
+            summary="Redeems an invite code for a patient to associate with a nutritionist",
         )
         def redeem_invite(
             payload: RedeemInviteRequestDTO,

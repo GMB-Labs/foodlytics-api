@@ -17,7 +17,7 @@ class  User(AuditableAbstractAggregateRoot):
     @classmethod
     def from_auth0_payload(cls, payload: dict, role: UserRole) -> "User":
         sub = payload.get("sub")
-        email = payload.get("email")
+        email = payload.get("email") or payload.get("https://foodlytics.app/email")
         scope_raw = payload.get("scope", "")
         permissions = payload.get("permissions", [])
 

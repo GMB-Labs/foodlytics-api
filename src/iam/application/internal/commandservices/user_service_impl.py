@@ -23,7 +23,7 @@ class UserServiceImpl(UserService):
         :return:
         """
         sub = payload.get("sub")
-        email = payload.get("email")
+        email = self._resolve_email(payload)
         role = self._resolve_role(payload)
 
         user = self.user_repository.find_by_auth0_id(sub)
@@ -54,6 +54,10 @@ class UserServiceImpl(UserService):
         :return:
         """
         return self.user_repository.find_by_id(user_id)
+
+    def _resolve_email(self, payload: Dict) -> Optional[str]:
+        # Prefer the standard email claim and fall back to our custom namespace claim
+        return payload.get("email") or payload.get("https://foodlytics.app/email")
 
     def _resolve_role(self, payload: Dict) -> UserRole:
         custom_roles = payload.get("https://foodlytics.app/roles") or payload.get("roles")
