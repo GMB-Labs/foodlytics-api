@@ -7,6 +7,8 @@ from src.profile.domain.repositories.nutritionist_invite_code_repository import 
     NutritionistInviteCodeRepository,
 )
 from src.profile.domain.repositories.profile_repository import ProfileRepository
+from src.iam.domain.repositories.user_repository import UserRepository
+from src.iam.domain.model.value_objects.user_role import UserRole
 
 
 class NutritionistInviteService:
@@ -18,10 +20,12 @@ class NutritionistInviteService:
         self,
         code_repository: NutritionistInviteCodeRepository,
         profile_repository: ProfileRepository,
+        user_repository: UserRepository,
         max_attempts: int = 5,
     ):
         self.code_repository = code_repository
         self.profile_repository = profile_repository
+        self.user_repository = user_repository
         self.max_attempts = max_attempts
 
     def _generate_unique_code(self) -> str:
@@ -52,6 +56,12 @@ class NutritionistInviteService:
             raise ValueError("Código inválido.")
         if invite.used:
             raise ValueError("Código ya fue usado.")
+
+        user = self.user_repository.find_by_id(patient_id)
+        if not user:
+            raise ValueError("User not found.")
+        if user.role == UserRole.NUTRITIONIST:
+            raise ValueError("nutricionist cannot be assigned to another nutritionist")
 
         profile = self._get_patient_profile(patient_id)
         if profile.nutritionist_id:

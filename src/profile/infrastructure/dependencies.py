@@ -16,6 +16,8 @@ from src.profile.infrastructure.persistance.sqlalchemy.repositories.sqlalchemy_n
 from src.shared.domain.events.event_bus import EventBus
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.shared.infrastructure.persistence.sqlalchemy.session import get_db
+from src.iam.domain.repositories.user_repository import UserRepository
+from src.iam.infrastructure.dependencies import get_user_repository
 
 
 def get_profile_repository(db: Session = Depends(get_db)) -> ProfileRepository:
@@ -36,5 +38,6 @@ def get_profile_command_service(
 def get_nutritionist_invite_service(
     invite_repo: NutritionistInviteCodeRepository = Depends(get_nutritionist_invite_code_repository),
     profile_repo: ProfileRepository = Depends(get_profile_repository),
+    user_repo: UserRepository = Depends(get_user_repository),
 ) -> NutritionistInviteService:
-    return NutritionistInviteService(invite_repo, profile_repo)
+    return NutritionistInviteService(invite_repo, profile_repo, user_repo)
