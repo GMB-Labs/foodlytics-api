@@ -16,7 +16,6 @@ class CalorieTarget:
     updated_at: datetime
 
     @classmethod
-    @classmethod
     def create(
         cls,
         *,

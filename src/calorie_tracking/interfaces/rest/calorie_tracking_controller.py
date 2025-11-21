@@ -19,6 +19,8 @@ from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import
     NutritionistDailySummariesDTO,
     NutritionistDailyRangeSummariesDTO,
 )
+from src.profile.domain.repositories.profile_repository import ProfileRepository
+from src.profile.infrastructure.dependencies import get_profile_repository
 
 
 class CalorieTrackingController:
@@ -114,14 +116,22 @@ class CalorieTrackingController:
         @self.router.get("", response_model=List[CalorieTargetResponseDTO])
         def list_targets(
             service: CalorieTargetService = Depends(get_calorie_target_service),
+            profile_repo: ProfileRepository = Depends(get_profile_repository),
         ):
             targets = service.list_all()
-            return [CalorieTargetResponseDTO.from_domain(target) for target in targets]
+            return [
+                CalorieTargetResponseDTO.from_domain(
+                    target,
+                    bmi=self._calculate_bmi(profile_repo, target.patient_id),
+                )
+                for target in targets
+            ]
 
         @self.router.get("/{patient_id}", response_model=CalorieTargetResponseDTO)
         def get_target(
             patient_id: str,
             service: CalorieTargetService = Depends(get_calorie_target_service),
+            profile_repo: ProfileRepository = Depends(get_profile_repository),
         ):
             target = service.get_by_patient(patient_id)
             if not target:
@@ -129,4 +139,15 @@ class CalorieTrackingController:
                     status_code=404,
                     detail="Calorie target not found for this patient.",
                 )
-            return CalorieTargetResponseDTO.from_domain(target)
+            bmi = self._calculate_bmi(profile_repo, patient_id)
+            return CalorieTargetResponseDTO.from_domain(target, bmi=bmi)
+
+    @staticmethod
+    def _calculate_bmi(profile_repo: ProfileRepository, patient_id: str) -> float | None:
+        profile = profile_repo.find_by_user_id(patient_id)
+        if not profile or not profile.weight_kg or not profile.height_cm:
+            return None
+        if profile.height_cm <= 0 or profile.weight_kg <= 0:
+            return None
+        height_m = profile.height_cm / 100
+        return round(profile.weight_kg / (height_m ** 2), 2)
