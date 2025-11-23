@@ -19,6 +19,10 @@ from src.iam.interfaces.rest.auth_controller import router as auth_router
 from src.profile.interfaces.rest.profile_controller import ProfileController
 from src.payments.interfaces.rest.payment_controller import router as payments_router
 
+# TESTING
+from src.subscriptions.interfaces.subscriptions_controller import router as subscriptions_router
+from src.subscriptions.interfaces.subscriptions_webhook_controller import router as subscriptions_webhook_router
+
 
 # ==============================================
 #  Configuración principal de la aplicación
@@ -78,6 +82,9 @@ app.include_router(meal_controller.router,prefix=API_PREFIX)
 calorie_controller = CalorieTrackingController()
 app.include_router(calorie_controller.router, prefix=API_PREFIX)
 
+# PAGOS TESTING CAUSA
+app.include_router(subscriptions_router)
+app.include_router(subscriptions_webhook_router)
 # Rutas de Pagos (Culqi)
 app.include_router(payments_router, prefix=API_PREFIX)
 
