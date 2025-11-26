@@ -1,26 +1,24 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from src.notifications.domain.model.value_objects.notification_status import NotificationStatus
 from src.notifications.domain.model.value_objects.notification_type import NotificationType
 
 
 class NotificationRequestDTO(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     user_id: str = Field(alias="userId")
-    notification_id: str = Field(alias="notificationId")
+    notification_id: Optional[str] = Field(default=None, alias="notificationId")
     type: NotificationType
     scheduled_at: datetime = Field(alias="scheduledAt")
     status: NotificationStatus = NotificationStatus.SCHEDULED
     metadata: Optional[Dict[str, Any]] = None
 
-    class Config:
-        allow_population_by_field_name = True
-        populate_by_name = True
-
 
 class NotificationResponseDTO(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     user_id: str = Field(alias="userId")
     notification_id: str = Field(alias="notificationId")
     type: NotificationType
@@ -29,10 +27,6 @@ class NotificationResponseDTO(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
-
-    class Config:
-        allow_population_by_field_name = True
-        populate_by_name = True
 
     @classmethod
     def from_domain(cls, notification) -> "NotificationResponseDTO":

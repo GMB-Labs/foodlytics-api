@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional
+from uuid import uuid4
 
 from src.notifications.domain.model.entities.notification import Notification
 from src.notifications.domain.model.value_objects.notification_status import NotificationStatus
@@ -14,13 +15,14 @@ class NotificationService:
     def create_notification(
         self,
         *,
-        notification_id: str,
         user_id: str,
         type: str | NotificationType,
         scheduled_at: datetime,
         status: str | NotificationStatus,
         metadata: Optional[Dict] = None,
+        notification_id: Optional[str] = None,
     ) -> Notification:
+        notification_id = notification_id or str(uuid4())
         if self.repository.get(notification_id):
             raise ValueError("Notification already exists.")
 
@@ -28,12 +30,12 @@ class NotificationService:
         notif_status = NotificationStatus.from_string(status) if isinstance(status, str) else status
 
         notification = Notification.create(
-            notification_id=notification_id,
             user_id=user_id,
             type=notif_type,
             scheduled_at=scheduled_at,
             status=notif_status,
             metadata=metadata,
+            notification_id=notification_id,
         )
         return self.repository.save(notification)
 
