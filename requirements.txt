@@ -13,3 +13,4 @@ requests
 openai
 python-multipart
 culqi
+pydantic[email]
