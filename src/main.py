@@ -9,6 +9,7 @@ from src.calorie_tracking.application.internal.eventhandlers import register_cal
 from src.calorie_tracking.interfaces.rest.calorie_tracking_controller import CalorieTrackingController
 from src.physical_activity.interfaces.rest.physical_activity_controller import PhysicalActivityController
 from src.nutritionist_webtools.interfaces.rest.nutritionist_webtools_controller import NutritionistWebtoolsController
+from src.notifications.interfaces.rest.notification_controller import NotificationController
 
 # Importaciones internas
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base, engine
@@ -66,6 +67,7 @@ hello_auth_service_impl = Auth0MachineService()
 hello_controller = HelloController(auth_service=hello_auth_service_impl)
 profile_controller = ProfileController()
 physical_activity_controller = PhysicalActivityController()
+notification_controller = NotificationController()
 
 # register cross-context event handlers
 register_profile_event_handlers(get_event_bus())
@@ -75,6 +77,7 @@ app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(profile_controller.router, prefix=API_PREFIX)
 app.include_router(physical_activity_controller.router, prefix=API_PREFIX)
+app.include_router(notification_controller.router, prefix=API_PREFIX)
 
 meal_controller = MealRecognitionController()
 app.include_router(meal_controller.router,prefix=API_PREFIX)
