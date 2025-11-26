@@ -8,6 +8,7 @@ from src.profile.application.internal.eventhandlers import register_profile_even
 from src.calorie_tracking.application.internal.eventhandlers import register_calorie_tracking_event_handlers
 from src.calorie_tracking.interfaces.rest.calorie_tracking_controller import CalorieTrackingController
 from src.physical_activity.interfaces.rest.physical_activity_controller import PhysicalActivityController
+from src.nutritionist_webtools.interfaces.rest.nutritionist_webtools_controller import NutritionistWebtoolsController
 
 # Importaciones internas
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base, engine
@@ -79,6 +80,8 @@ meal_controller = MealRecognitionController()
 app.include_router(meal_controller.router,prefix=API_PREFIX)
 calorie_controller = CalorieTrackingController()
 app.include_router(calorie_controller.router, prefix=API_PREFIX)
+nw_controller = NutritionistWebtoolsController()
+app.include_router(nw_controller.router, prefix=API_PREFIX)
 
 # PAGOS TESTING CAUSA
 
