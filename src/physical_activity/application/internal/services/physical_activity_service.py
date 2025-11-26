@@ -114,3 +114,22 @@ class PhysicalActivityService:
             "steps": steps,
             "calories_burned": calories,
         }
+
+    def get_activity_by_day(self, *, user_id: str, day: date) -> Dict:
+        """
+        Returns burned calories and basic status for the given user and day.
+        """
+        # Ensure the user exists before querying summaries.
+        self._get_profile(user_id)
+
+        summary = self.comparison_service.get_daily_summary(
+            patient_id=user_id, day=day
+        )
+
+        return {
+            "user_id": user_id,
+            "day": day,
+            "activity_burned": summary.get("activity_burned", 0.0),
+            "net_calories": summary.get("net_calories"),
+            "status": summary.get("status"),
+        }

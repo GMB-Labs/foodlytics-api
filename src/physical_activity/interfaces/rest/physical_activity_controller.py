@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.physical_activity.application.internal.services.physical_activity_service import (
@@ -6,6 +8,7 @@ from src.physical_activity.application.internal.services.physical_activity_servi
 from src.physical_activity.infrastructure.dependencies import get_physical_activity_service
 from src.physical_activity.interfaces.dto.physical_activity_dto import (
     ActivityAIRequestDTO,
+    ActivityByDayResponseDTO,
     ActivityCaloriesResponseDTO,
     StepsActivityRequestDTO,
     StepsCaloriesResponseDTO,
@@ -63,3 +66,21 @@ class PhysicalActivityController:
                     status.HTTP_400_BAD_REQUEST if "steps must be" in str(exc) else status.HTTP_404_NOT_FOUND
                 )
                 raise HTTPException(status_code=status_code, detail=str(exc)) from exc
+
+        @self.router.get(
+            "/{user_id}",
+            response_model=ActivityByDayResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="Obtiene calorías quemadas por usuario y fecha.",
+        )
+        def get_activity_by_day(
+            user_id: str,
+            date: datetime,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.get_activity_by_day(user_id=user_id, day=date.date())
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+                ) from exc

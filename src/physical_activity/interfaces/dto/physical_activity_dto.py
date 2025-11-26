@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -28,3 +29,11 @@ class ActivityCaloriesResponseDTO(BaseModel):
 class StepsCaloriesResponseDTO(BaseModel):
     steps: int
     calories_burned: float
+
+
+class ActivityByDayResponseDTO(BaseModel):
+    user_id: str
+    day: date
+    activity_burned: float
+    net_calories: Optional[float] = None
+    status: Optional[str] = None
