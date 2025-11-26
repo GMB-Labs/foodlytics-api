@@ -18,6 +18,7 @@ from src.profile.interfaces.dto.update_profile_request_dto import UpdateProfileD
 from src.profile.interfaces.dto.nutritionist_invite_dto import (
     GenerateInviteResponseDTO,
     RedeemInviteRequestDTO,
+    NutritionistInfoResponseDTO,
 )
 from src.shared.infrastructure.dependencies import get_event_bus
 from src.shared.domain.events.event_bus import EventBus
@@ -128,15 +129,27 @@ class ProfileController:
 
         @self.router.post(
             "/redeem-invite",
-            response_model=ProfileResponseDTO,
+            response_model=NutritionistInfoResponseDTO,
             summary="Redeems an invite code for a patient to associate with a nutritionist",
         )
         def redeem_invite(
             payload: RedeemInviteRequestDTO,
             service: NutritionistInviteService = Depends(get_nutritionist_invite_service),
+            profile_repo: ProfileRepository = Depends(get_profile_repository),
         ):
             try:
                 profile = service.redeem_code(code=payload.code, patient_id=payload.patient_id)
-                return ProfileResponseDTO.from_domain(profile)
+                nutritionist_profile = (
+                    profile_repo.find_by_user_id(profile.nutritionist_id) if profile.nutritionist_id else None
+                )
+                if not nutritionist_profile:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Nutritionist profile not found.",
+                    )
+                return NutritionistInfoResponseDTO(
+                    first_name=nutritionist_profile.first_name,
+                    last_name=nutritionist_profile.last_name,
+                )
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

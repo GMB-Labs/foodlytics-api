@@ -8,3 +8,8 @@ class GenerateInviteResponseDTO(BaseModel):
 class RedeemInviteRequestDTO(BaseModel):
     patient_id: str = Field(..., description="ID del paciente que se va a asociar.")
     code: str = Field(..., description="Código de 6 dígitos proporcionado por el nutricionista.")
+
+
+class NutritionistInfoResponseDTO(BaseModel):
+    first_name: str
+    last_name: str
