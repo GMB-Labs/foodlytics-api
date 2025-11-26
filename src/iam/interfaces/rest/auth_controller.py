@@ -26,7 +26,11 @@ def sync_user_from_token(
         raise HTTPException(status_code=400, detail="Token payload is missing 'sub'")
 
     user = service.get_or_create_from_payload(payload)
-    return {"ok": True, "id": user.id}
+    return {
+        "ok": True,
+        "id": user.id,
+        "nutritionist_id": user.nutritionist_id,
+    }
 
 @router.get("/me")
 def me(

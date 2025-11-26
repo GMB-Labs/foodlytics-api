@@ -55,7 +55,7 @@ class SqlAlchemyProfileRepository(ProfileRepository):
         model.height_cm = entity.height_cm
         model.weight_kg = entity.weight_kg
         model.gender = entity.gender.value
-        model.goal_type = entity.goal_type.value
+        model.goal_type = entity.goal_type.value if entity.goal_type else None
         model.activity_level = entity.activity_level.value if entity.activity_level else None
         model.desired_weight_kg = entity.desired_weight_kg
         model.user_profile_completed = 1 if entity.user_profile_completed else 0

@@ -31,8 +31,13 @@ class  User(AuditableAbstractAggregateRoot):
             email=email,
             role=role,
             scopes=scopes,
-            permissions=permissions
+            permissions=permissions,
         )
+
+    @property
+    def nutritionist_id(self) -> Optional[str]:
+        """Expose the nutritionist id (self id) only when the user is a nutritionist."""
+        return self.id if self.is_nutritionist() else None
 
     def has_permission(self, perm: str) -> bool:
         return perm in self.permissions or perm in self.scopes
