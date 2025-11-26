@@ -14,7 +14,10 @@ from src.calorie_tracking.infrastructure.dependencies import (
     get_nutritionist_daily_results_service,
 )
 from src.calorie_tracking.interfaces.dto.calorie_target_dto import CalorieTargetResponseDTO
-from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import DailyIntakeSummaryDTO
+from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import (
+    DailyIntakeSummaryDTO,
+    DailyIntakeSummaryNoBmiDTO,
+)
 from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import (
     NutritionistDailySummariesDTO,
     NutritionistDailyRangeSummariesDTO,
@@ -31,7 +34,7 @@ class CalorieTrackingController:
     def register_routes(self) -> None:
         @self.router.get(
             "/{patient_id}/daily-summary",
-            response_model=DailyIntakeSummaryDTO,
+            response_model=DailyIntakeSummaryNoBmiDTO,
             summary="Compare daily intake vs. target",
         )
         def get_daily_summary(
@@ -40,9 +43,10 @@ class CalorieTrackingController:
             service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
         ):
             try:
-                summary = service.get_daily_summary(
-                    patient_id=patient_id, day=day
-                )
+                summary = service.get_daily_summary(patient_id=patient_id, day=day)
+                for section in ("target", "consumed", "difference"):
+                    if section in summary and isinstance(summary[section], dict):
+                        summary[section].pop("bmi", None)
                 return summary
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc

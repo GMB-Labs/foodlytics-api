@@ -3,6 +3,7 @@ from src.physical_activity.interfaces.dto.physical_activity_dto import (
     StepsActivityRequestDTO,
     ActivityCaloriesResponseDTO,
     StepsCaloriesResponseDTO,
+    ActivityByDayResponseDTO,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "StepsActivityRequestDTO",
     "ActivityCaloriesResponseDTO",
     "StepsCaloriesResponseDTO",
+    "ActivityByDayResponseDTO",
 ]
