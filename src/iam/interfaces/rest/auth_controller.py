@@ -29,7 +29,7 @@ def sync_user_from_token(
     return {
         "ok": True,
         "id": user.id,
-        "nutritionist_id": user.nutritionist_id,
+        "nutritionist_id": None,
     }
 
 @router.get("/me")
