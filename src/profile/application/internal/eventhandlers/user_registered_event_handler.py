@@ -31,7 +31,7 @@ class UserRegisteredEventHandler:
     default_height_cm: float = 0.0
     default_weight_kg: float = 0.0
     default_gender: Gender = Gender.OTHER
-    default_goal: GoalType = GoalType.MAINTENANCE
+    default_goal: GoalType | None = None
 
     def __call__(self, event: UserRegisteredEvent) -> None:
         logger.debug("Handling UserRegisteredEvent for '%s'", event.user_id)
@@ -43,9 +43,13 @@ class UserRegisteredEventHandler:
                 logger.debug("Profile already exists for '%s'; skipping creation.", event.user_id)
                 return
 
+            nutritionist_id = (
+                event.user_id if event.role == UserRole.NUTRITIONIST else self.default_nutritionist_id
+            )
+
             command = CreateProfileCommand(
                 user_id=event.user_id,
-                nutritionist_id=self.default_nutritionist_id,
+                nutritionist_id=nutritionist_id,
                 first_name=self.default_first_name,
                 last_name=self.default_last_name,
                 age=self.default_age,
