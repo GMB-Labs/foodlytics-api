@@ -34,6 +34,8 @@ class StepsCaloriesResponseDTO(BaseModel):
 class ActivityByDayResponseDTO(BaseModel):
     user_id: str
     day: date
+    activity_type: Optional[str] = None
+    activity_duration_minutes: Optional[float] = None
     activity_burned: float
     net_calories: Optional[float] = None
     status: Optional[str] = None

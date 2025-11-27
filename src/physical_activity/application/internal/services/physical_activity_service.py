@@ -129,6 +129,8 @@ class PhysicalActivityService:
         return {
             "user_id": user_id,
             "day": day,
+            "activity_type": summary.get("activity_type"),
+            "activity_duration_minutes": summary.get("activity_duration_minutes"),
             "activity_burned": summary.get("activity_burned", 0.0),
             "net_calories": summary.get("net_calories"),
             "status": summary.get("status"),
