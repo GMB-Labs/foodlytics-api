@@ -15,3 +15,15 @@ class WeightHistoryResponseDTO(BaseModel):
     start_date: date
     end_date: date
     weights: List[WeightHistoryEntryDTO]
+
+
+class WeightHistoryUpsertRequestDTO(BaseModel):
+    day: date
+    weight_kg: float
+
+
+class WeightHistoryEntryResponseDTO(BaseModel):
+    user_id: str
+    day: date
+    weight_kg: float
+    updated_at: datetime

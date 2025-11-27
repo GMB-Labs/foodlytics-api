@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Dict
 
 from src.calorie_tracking.domain.repository.weight_history_repository import WeightHistoryRepository
@@ -45,4 +45,24 @@ class WeightHistoryService:
                 }
                 for entry in entries
             ],
+        }
+
+    def record_weight(self, *, user_id: str, day: date, weight_kg: float) -> Dict:
+        if weight_kg <= 0:
+            raise ValueError("weight_kg must be greater than zero.")
+
+        self._ensure_user_exists(user_id)
+
+        entry = self.weight_history_repository.upsert_for_day(
+            user_id=user_id,
+            day=day,
+            weight_kg=weight_kg,
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        return {
+            "user_id": entry.user_id,
+            "day": entry.day,
+            "weight_kg": entry.weight_kg,
+            "updated_at": entry.updated_at,
         }

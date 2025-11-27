@@ -1,7 +1,7 @@
 from datetime import date
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
 from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import DailyIntakeComparisonService
@@ -24,6 +24,8 @@ from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import
     NutritionistDailyRangeSummariesDTO,
 )
 from src.calorie_tracking.interfaces.dto.weight_history_dto import (
+    WeightHistoryEntryResponseDTO,
+    WeightHistoryUpsertRequestDTO,
     WeightHistoryResponseDTO,
 )
 from src.calorie_tracking.application.internal.services.weight_history_service import WeightHistoryService
@@ -142,6 +144,30 @@ class CalorieTrackingController:
                 status_code = (
                     status.HTTP_400_BAD_REQUEST
                     if "start_date must be on or before end_date." in message
+                    else status.HTTP_404_NOT_FOUND
+                )
+                raise HTTPException(status_code=status_code, detail=message) from exc
+
+        @self.router.put(
+            "/{patient_id}/weight-history",
+            response_model=WeightHistoryEntryResponseDTO,
+            summary="Registra/actualiza el peso de un día específico",
+            status_code=status.HTTP_200_OK,
+        )
+        def upsert_weight_history(
+            patient_id: str,
+            payload: WeightHistoryUpsertRequestDTO,
+            service: WeightHistoryService = Depends(get_weight_history_service),
+        ):
+            try:
+                return service.record_weight(
+                    user_id=patient_id, day=payload.day, weight_kg=payload.weight_kg
+                )
+            except ValueError as exc:
+                message = str(exc)
+                status_code = (
+                    status.HTTP_400_BAD_REQUEST
+                    if "must be" in message or "before end_date" in message
                     else status.HTTP_404_NOT_FOUND
                 )
                 raise HTTPException(status_code=status_code, detail=message) from exc
