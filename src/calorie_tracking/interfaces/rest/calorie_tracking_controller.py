@@ -12,6 +12,7 @@ from src.calorie_tracking.infrastructure.dependencies import (
     get_calorie_target_service,
     get_daily_comparison_service,
     get_nutritionist_daily_results_service,
+    get_weight_history_service,
 )
 from src.calorie_tracking.interfaces.dto.calorie_target_dto import CalorieTargetResponseDTO
 from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import (
@@ -22,6 +23,10 @@ from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import
     NutritionistDailySummariesDTO,
     NutritionistDailyRangeSummariesDTO,
 )
+from src.calorie_tracking.interfaces.dto.weight_history_dto import (
+    WeightHistoryResponseDTO,
+)
+from src.calorie_tracking.application.internal.services.weight_history_service import WeightHistoryService
 from src.profile.domain.repositories.profile_repository import ProfileRepository
 from src.profile.infrastructure.dependencies import get_profile_repository
 
@@ -115,6 +120,30 @@ class CalorieTrackingController:
             except ValueError as exc:
                 message = str(exc)
                 status_code = 400 if "start_date" in message else 404
+                raise HTTPException(status_code=status_code, detail=message) from exc
+
+        @self.router.get(
+            "/{patient_id}/weight-history",
+            response_model=WeightHistoryResponseDTO,
+            summary="Weight changes per day within a date range",
+        )
+        def get_weight_history(
+            patient_id: str,
+            start_date: date,
+            end_date: date,
+            service: WeightHistoryService = Depends(get_weight_history_service),
+        ):
+            try:
+                return service.get_history(
+                    user_id=patient_id, start_date=start_date, end_date=end_date
+                )
+            except ValueError as exc:
+                message = str(exc)
+                status_code = (
+                    status.HTTP_400_BAD_REQUEST
+                    if "start_date must be on or before end_date." in message
+                    else status.HTTP_404_NOT_FOUND
+                )
                 raise HTTPException(status_code=status_code, detail=message) from exc
 
         @self.router.get("", response_model=List[CalorieTargetResponseDTO])

@@ -6,11 +6,14 @@ from src.calorie_tracking.application.internal.services.daily_intake_comparison_
 from src.calorie_tracking.application.internal.services.nutritionist_daily_results_service import (
     NutritionistDailyResultsService,
 )
+from src.calorie_tracking.application.internal.services.weight_history_service import WeightHistoryService
 from src.calorie_tracking.domain.repository.calorie_target_repository import CalorieTargetRepository
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository
+from src.calorie_tracking.domain.repository.weight_history_repository import WeightHistoryRepository
 from src.calorie_tracking.infrastructure.persistence.sqlalchemy.repository import (
     SqlAlchemyCalorieTargetRepository,
     SqlAlchemyDailyIntakeSummaryRepository,
+    SqlAlchemyWeightHistoryRepository,
 )
 from src.meal_recognition.domain.repository.meal_repository import MealRepository
 from src.meal_recognition.infrastructure.persistence.sqlalchemy.repository.sqlalchemy_meal_repository import SqlAlchemyMealRepository
@@ -35,6 +38,9 @@ def get_meal_repository(db: Session = Depends(get_db)) -> MealRepository:
 def get_daily_intake_summary_repository(db: Session = Depends(get_db)) -> DailyIntakeSummaryRepository:
     return SqlAlchemyDailyIntakeSummaryRepository(db)
 
+def get_weight_history_repository(db: Session = Depends(get_db)) -> WeightHistoryRepository:
+    return SqlAlchemyWeightHistoryRepository(db)
+
 
 def get_daily_comparison_service(
     meal_repo: MealRepository = Depends(get_meal_repository),
@@ -50,3 +56,10 @@ def get_nutritionist_daily_results_service(
     comparison_service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
 ) -> NutritionistDailyResultsService:
     return NutritionistDailyResultsService(profile_repo, comparison_service)
+
+
+def get_weight_history_service(
+    weight_history_repo: WeightHistoryRepository = Depends(get_weight_history_repository),
+    profile_repo: ProfileRepository = Depends(get_profile_repository),
+) -> WeightHistoryService:
+    return WeightHistoryService(weight_history_repo, profile_repo)

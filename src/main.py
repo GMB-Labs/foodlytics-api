@@ -74,7 +74,7 @@ notification_controller = NotificationController()
 register_profile_event_handlers(get_event_bus())
 register_calorie_tracking_event_handlers(get_event_bus())
 
-app.include_router(hello_controller.router,prefix=API_PREFIX)
+##app.include_router(hello_controller.router,prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(profile_controller.router, prefix=API_PREFIX)
 app.include_router(physical_activity_controller.router, prefix=API_PREFIX)
