@@ -153,3 +153,23 @@ class ProfileController:
                 )
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+        @self.router.get(
+            "/patients/{nutritionist_id}/nutritionist-info",
+            response_model=NutritionistInfoResponseDTO,
+            summary="Obtiene nombre y apellido de un nutricionista por su ID",
+        )
+        def get_nutritionist_info(
+            nutritionist_id: str,
+            profile_repo: ProfileRepository = Depends(get_profile_repository),
+        ):
+            profile = profile_repo.find_by_user_id(nutritionist_id)
+            if not profile:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Nutritionist profile not found.",
+                )
+            return NutritionistInfoResponseDTO(
+                first_name=profile.first_name,
+                last_name=profile.last_name,
+            )
