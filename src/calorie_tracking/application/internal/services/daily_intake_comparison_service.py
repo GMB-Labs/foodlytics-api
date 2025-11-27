@@ -3,6 +3,7 @@ from typing import Dict, List
 
 from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
 from src.calorie_tracking.domain.model.entities.daily_intake_summary import DailyIntakeSummary
+from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository
 from src.meal_recognition.domain.model.entities.meal import Meal
 from src.meal_recognition.domain.repository.meal_repository import MealRepository
@@ -57,11 +58,11 @@ class DailyIntakeComparisonService:
 
         bmi = self._calculate_bmi(patient_id)
 
-        status = "within_target"
+        status = DailySummaryStatus.WITHIN_TARGET
         if net_calories > target.calories:
-            status = "over_target"
+            status = DailySummaryStatus.OVER_TARGET
         elif net_calories < target.calories * 0.9:
-            status = "under_target"
+            status = DailySummaryStatus.UNDER_TARGET
 
         return {
             "day": day,
@@ -77,7 +78,7 @@ class DailyIntakeComparisonService:
             "difference": diff,
             "activity_burned": activity_burned,
             "net_calories": net_calories,
-            "status": status,
+            "status": status.value,
         }
 
     def _calculate_bmi(self, patient_id: str) -> float | None:
@@ -108,6 +109,8 @@ class DailyIntakeComparisonService:
         net_calories = summary_dict.get("net_calories", consumed["calories"])
 
         entity = self.summary_repository.find_by_patient_and_day(patient_id, day)
+        status = DailySummaryStatus(summary_dict["status"])
+
         if entity:
             entity.apply_update(
                 target_calories=target["calories"],
@@ -119,7 +122,7 @@ class DailyIntakeComparisonService:
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
                 activity_burned=total_activity_burned,
-                status=summary_dict["status"],
+                status=status,
             )
         else:
             entity = DailyIntakeSummary.create(
@@ -134,7 +137,7 @@ class DailyIntakeComparisonService:
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
                 activity_burned=total_activity_burned,
-                status=summary_dict["status"],
+                status=status,
             )
 
         return self.summary_repository.save(entity)

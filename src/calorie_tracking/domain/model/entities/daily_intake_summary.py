@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 
+from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
+
 
 @dataclass
 class DailyIntakeSummary:
@@ -17,7 +19,7 @@ class DailyIntakeSummary:
     consumed_carbs: float
     consumed_fats: float
     activity_burned: float
-    status: str
+    status: DailySummaryStatus
     created_at: datetime
     updated_at: datetime
 
@@ -36,7 +38,7 @@ class DailyIntakeSummary:
         consumed_carbs: float,
         consumed_fats: float,
         activity_burned: float,
-        status: str,
+        status: DailySummaryStatus,
     ) -> "DailyIntakeSummary":
         now = datetime.now(timezone.utc)
         return cls(
@@ -68,7 +70,7 @@ class DailyIntakeSummary:
         consumed_carbs: float,
         consumed_fats: float,
         activity_burned: float,
-        status: str,
+        status: DailySummaryStatus,
     ) -> None:
         self.target_calories = target_calories
         self.target_protein = target_protein

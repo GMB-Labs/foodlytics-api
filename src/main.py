@@ -63,8 +63,9 @@ API_PREFIX = "/api/v1"
 # ==============================================
 #  Registro de controladores (rutas)
 # ==============================================
-hello_auth_service_impl = Auth0MachineService()
-hello_controller = HelloController(auth_service=hello_auth_service_impl)
+
+# hello_auth_service_impl = Auth0MachineService()
+# hello_controller = HelloController(auth_service=hello_auth_service_impl)
 profile_controller = ProfileController()
 physical_activity_controller = PhysicalActivityController()
 notification_controller = NotificationController()

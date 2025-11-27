@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -39,3 +39,10 @@ class ActivityByDayResponseDTO(BaseModel):
     activity_burned: float
     net_calories: Optional[float] = None
     status: Optional[str] = None
+
+
+class ActivityRangeResponseDTO(BaseModel):
+    user_id: str
+    start_date: date
+    end_date: date
+    days: List[ActivityByDayResponseDTO]

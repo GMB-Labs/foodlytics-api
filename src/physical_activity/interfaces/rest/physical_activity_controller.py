@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -10,6 +10,7 @@ from src.physical_activity.interfaces.dto.physical_activity_dto import (
     ActivityAIRequestDTO,
     ActivityByDayResponseDTO,
     ActivityCaloriesResponseDTO,
+    ActivityRangeResponseDTO,
     StepsActivityRequestDTO,
     StepsCaloriesResponseDTO,
 )
@@ -84,3 +85,28 @@ class PhysicalActivityController:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
                 ) from exc
+
+        @self.router.get(
+            "/{user_id}/range",
+            response_model=ActivityRangeResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="Obtiene calorías quemadas por usuario en un rango de fechas.",
+        )
+        def get_activity_range(
+            user_id: str,
+            start_date: date,
+            end_date: date,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.get_activity_range(
+                    user_id=user_id, start_date=start_date, end_date=end_date
+                )
+            except ValueError as exc:
+                message = str(exc)
+                status_code = (
+                    status.HTTP_400_BAD_REQUEST
+                    if "start_date must be on or before end_date." in message
+                    else status.HTTP_404_NOT_FOUND
+                )
+                raise HTTPException(status_code=status_code, detail=message) from exc

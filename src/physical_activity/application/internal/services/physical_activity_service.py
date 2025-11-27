@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict, Optional
 
 from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import (
@@ -134,4 +134,40 @@ class PhysicalActivityService:
             "activity_burned": summary.get("activity_burned", 0.0),
             "net_calories": summary.get("net_calories"),
             "status": summary.get("status"),
+        }
+
+    def get_activity_range(self, *, user_id: str, start_date: date, end_date: date) -> Dict:
+        """
+        Returns activity data for a user across a date range.
+        """
+        if end_date < start_date:
+            raise ValueError("start_date must be on or before end_date.")
+
+        # Validate user exists.
+        self._get_profile(user_id)
+
+        days = []
+        current = start_date
+        while current <= end_date:
+            summary = self.comparison_service.get_daily_summary(
+                patient_id=user_id, day=current
+            )
+            days.append(
+                {
+                    "user_id": user_id,
+                    "day": current,
+                    "activity_type": summary.get("activity_type"),
+                    "activity_duration_minutes": summary.get("activity_duration_minutes"),
+                    "activity_burned": summary.get("activity_burned", 0.0),
+                    "net_calories": summary.get("net_calories"),
+                    "status": summary.get("status"),
+                }
+            )
+            current += timedelta(days=1)
+
+        return {
+            "user_id": user_id,
+            "start_date": start_date,
+            "end_date": end_date,
+            "days": days,
         }

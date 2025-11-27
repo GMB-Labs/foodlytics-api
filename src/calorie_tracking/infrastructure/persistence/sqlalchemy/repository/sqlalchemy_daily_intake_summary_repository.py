@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from src.calorie_tracking.domain.model.entities.daily_intake_summary import DailyIntakeSummary
+from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository
 from src.calorie_tracking.infrastructure.persistence.sqlalchemy.models.daily_intake_summary_model import (
     DailyIntakeSummaryModel,
@@ -27,7 +28,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
             consumed_carbs=model.consumed_carbs,
             consumed_fats=model.consumed_fats,
             activity_burned=model.activity_burned,
-            status=model.status,
+            status=DailySummaryStatus(model.status),
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -44,7 +45,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
         model.consumed_carbs = entity.consumed_carbs
         model.consumed_fats = entity.consumed_fats
         model.activity_burned = entity.activity_burned
-        model.status = entity.status
+        model.status = entity.status.value if isinstance(entity.status, DailySummaryStatus) else entity.status
         model.created_at = entity.created_at
         model.updated_at = entity.updated_at
 

@@ -1,5 +1,8 @@
 from datetime import date
+
 from pydantic import BaseModel
+
+from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 
 
 class MacroBreakdownDTO(BaseModel):
@@ -23,7 +26,7 @@ class DailyIntakeSummaryDTO(BaseModel):
     target: MacroBreakdownDTO
     consumed: MacroBreakdownDTO
     difference: MacroBreakdownDTO
-    status: str
+    status: DailySummaryStatus
     activity_burned: float = 0
     net_calories: float | None = None
 
@@ -34,6 +37,6 @@ class DailyIntakeSummaryNoBmiDTO(BaseModel):
     target: MacroBreakdownNoBmiDTO
     consumed: MacroBreakdownNoBmiDTO
     difference: MacroBreakdownNoBmiDTO
-    status: str
+    status: DailySummaryStatus
     activity_burned: float = 0
     net_calories: float | None = None
