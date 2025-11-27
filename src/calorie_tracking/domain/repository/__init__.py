@@ -1,4 +1,5 @@
 from src.calorie_tracking.domain.repository.calorie_target_repository import CalorieTargetRepository
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository
+from src.calorie_tracking.domain.repository.weight_history_repository import WeightHistoryRepository
 
-__all__ = ["CalorieTargetRepository", "DailyIntakeSummaryRepository"]
+__all__ = ["CalorieTargetRepository", "DailyIntakeSummaryRepository", "WeightHistoryRepository"]
