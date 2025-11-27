@@ -10,20 +10,26 @@ class TaskCommandService:
     def __init__(self, task_repository: TaskRepository):
         self.task_repository = task_repository
 
+    def _normalize_status(self, status: TaskStatus | str) -> TaskStatus:
+        if isinstance(status, TaskStatus):
+            return status
+        return TaskStatus.from_string(status)
+
     def create_task(
         self,
         *,
         nutritionist_id: str,
         task_name: str,
         task_description: str | None,
-        status: TaskStatus,
+        status: TaskStatus | str,
         deadline_date: date,
     ) -> Task:
+        normalized_status = self._normalize_status(status)
         task = Task.create(
             nutritionist_id=nutritionist_id,
             task_name=task_name,
             task_description=task_description,
-            status=status,
+            status=normalized_status,
             deadline_date=deadline_date,
         )
         self.task_repository.save(task)
@@ -38,10 +44,11 @@ class TaskCommandService:
             raise ValueError("Task not found")
         self.task_repository.delete(task)
 
-    def move_task(self, *, task_id: str, status: TaskStatus) -> Task:
+    def move_task(self, *, task_id: str, status: TaskStatus | str) -> Task:
         task = self.task_repository.find_by_id(task_id)
         if not task:
             raise ValueError("Task not found")
-        task.move_to(status)
+        normalized_status = self._normalize_status(status)
+        task.move_to(normalized_status)
         self.task_repository.save(task)
         return task
