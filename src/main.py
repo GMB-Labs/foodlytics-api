@@ -19,7 +19,6 @@ from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0Mac
 from src.iam.interfaces.rest.hello_controller import HelloController
 from src.iam.interfaces.rest.auth_controller import router as auth_router
 from src.profile.interfaces.rest.profile_controller import ProfileController
-from src.payments.interfaces.rest.payment_controller import router as payments_router
 from src.payments.interfaces.rest.payments_controller import router as culqi_payments_router
 
 
@@ -91,7 +90,6 @@ app.include_router(nw_controller.router, prefix=API_PREFIX)
 
 # Rutas de Pagos (Culqi)
 
-# app.include_router(payments_router, prefix=API_PREFIX)
 app.include_router(culqi_payments_router, prefix=API_PREFIX)
 
 # ==============================================
