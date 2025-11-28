@@ -50,6 +50,13 @@ class PhysicalActivityService:
             "goal_type": profile.goal_type.value if profile.goal_type else None,
         }
 
+    @staticmethod
+    def _is_step_activity(activity_type: Optional[str]) -> bool:
+        if not activity_type:
+            return False
+        normalized = activity_type.strip().lower()
+        return "step" in normalized
+
     def _contrast_with_calorie_tracking(
         self, *, patient_id: str, day: date, burned_calories: float
     ) -> Dict:
@@ -159,7 +166,8 @@ class PhysicalActivityService:
         self._get_profile(user_id)
 
         activities = self.activity_repository.list_by_user_and_day(user_id, day)
-        total_burned = sum(a.calories_burned for a in activities)
+        non_step_activities = [a for a in activities if not self._is_step_activity(a.activity_type)]
+        total_burned = sum(a.calories_burned for a in non_step_activities)
 
         # Recompute summary using the actual total burned from activities.
         summary = self.comparison_service.get_daily_summary(
@@ -178,7 +186,7 @@ class PhysicalActivityService:
                     "intensity": a.intensity,
                     "calories_burned": a.calories_burned,
                 }
-                for a in activities
+                for a in non_step_activities
             ],
             "activity_burned": total_burned,
             "net_calories": summary.get("net_calories"),
@@ -309,7 +317,7 @@ class PhysicalActivityService:
 
     def get_activity_range(self, *, user_id: str, start_date: date, end_date: date) -> Dict:
         """
-        Returns activity data for a user across a date range.
+        Returns activity counts per day for a user across a date range.
         """
         if end_date < start_date:
             raise ValueError("start_date must be on or before end_date.")
@@ -321,30 +329,9 @@ class PhysicalActivityService:
         current = start_date
         while current <= end_date:
             activities = self.activity_repository.list_by_user_and_day(user_id, current)
-            total_burned = sum(a.calories_burned for a in activities)
-            summary = self.comparison_service.get_daily_summary(
-                patient_id=user_id, day=current, activity_burned=total_burned
-            )
-            days.append(
-                {
-                    "id": summary.get("id"),
-                    "user_id": user_id,
-                    "day": current,
-                    "activities": [
-                        {
-                            "id": a.id,
-                            "activity_type": a.activity_type,
-                            "duration_minutes": a.duration_minutes,
-                            "intensity": a.intensity,
-                            "calories_burned": a.calories_burned,
-                        }
-                        for a in activities
-                    ],
-                    "activity_burned": total_burned,
-                    "net_calories": summary.get("net_calories"),
-                    "status": summary.get("status"),
-                }
-            )
+            # Only return the count per day (exclude step entries from the count).
+            non_step_count = sum(1 for a in activities if not self._is_step_activity(a.activity_type))
+            days.append({"day": current, "activity_count": non_step_count})
             current += timedelta(days=1)
 
         return {

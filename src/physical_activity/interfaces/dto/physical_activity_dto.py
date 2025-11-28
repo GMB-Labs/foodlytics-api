@@ -51,11 +51,16 @@ class ActivityByDayResponseDTO(BaseModel):
     status: Optional[str] = None
 
 
+class ActivityRangeDayResponseDTO(BaseModel):
+    day: date
+    activity_count: int
+
+
 class ActivityRangeResponseDTO(BaseModel):
     user_id: str
     start_date: date
     end_date: date
-    days: List[ActivityByDayResponseDTO]
+    days: List[ActivityRangeDayResponseDTO]
 
 
 class ActivityUpdateRequestDTO(BaseModel):
