@@ -135,6 +135,7 @@ class PhysicalActivityService:
         )
 
         return {
+            "id": summary.get("id"),
             "user_id": user_id,
             "day": day,
             "activity_type": summary.get("activity_type"),
@@ -144,21 +145,49 @@ class PhysicalActivityService:
             "status": summary.get("status"),
         }
 
-    def delete_activity_by_day(self, *, user_id: str, day: date) -> Dict:
+    def update_activity_by_id(
+        self,
+        *,
+        activity_id: str,
+        activity_burned: Optional[float] = None,
+        activity_type: Optional[str] = None,
+        activity_duration_minutes: Optional[float] = None,
+    ) -> Dict:
         """
-        Removes activity data for a given user and day.
+        Updates activity data by its id.
         """
-        # Ensure the user exists before attempting deletion.
-        self._get_profile(user_id)
-
-        self.comparison_service.remove_activity(patient_id=user_id, day=day)
-        summary = self.comparison_service.get_daily_summary(
-            patient_id=user_id, day=day
+        entity = self.comparison_service.update_activity_by_id(
+            summary_id=activity_id,
+            activity_burned=activity_burned,
+            activity_type=activity_type,
+            activity_duration_minutes=activity_duration_minutes,
         )
-
+        summary = self.comparison_service.get_daily_summary(
+            patient_id=entity.patient_id, day=entity.day
+        )
         return {
-            "user_id": user_id,
-            "day": day,
+            "id": summary.get("id"),
+            "user_id": entity.patient_id,
+            "day": entity.day,
+            "activity_type": summary.get("activity_type"),
+            "activity_duration_minutes": summary.get("activity_duration_minutes"),
+            "activity_burned": summary.get("activity_burned", 0.0),
+            "net_calories": summary.get("net_calories"),
+            "status": summary.get("status"),
+        }
+
+    def delete_activity_by_id(self, *, activity_id: str) -> Dict:
+        """
+        Removes activity data by its id.
+        """
+        entity = self.comparison_service.remove_activity_by_id(summary_id=activity_id)
+        summary = self.comparison_service.get_daily_summary(
+            patient_id=entity.patient_id, day=entity.day
+        )
+        return {
+            "id": summary.get("id"),
+            "user_id": entity.patient_id,
+            "day": entity.day,
             "activity_type": summary.get("activity_type"),
             "activity_duration_minutes": summary.get("activity_duration_minutes"),
             "activity_burned": summary.get("activity_burned", 0.0),
@@ -184,6 +213,7 @@ class PhysicalActivityService:
             )
             days.append(
                 {
+                    "id": summary.get("id"),
                     "user_id": user_id,
                     "day": current,
                     "activity_type": summary.get("activity_type"),

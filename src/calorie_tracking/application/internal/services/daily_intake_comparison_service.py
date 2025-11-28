@@ -83,6 +83,7 @@ class DailyIntakeComparisonService:
             status = DailySummaryStatus.UNDER_TARGET
 
         return {
+            "id": getattr(existing, "id", None),
             "day": day,
             "patient_id": patient_id,
             "target": {
@@ -196,6 +197,98 @@ class DailyIntakeComparisonService:
             activity_type=None,
             activity_duration_minutes=None,
         )
+        target = summary_dict["target"]
+        consumed = summary_dict["consumed"]
+        net_calories = summary_dict.get("net_calories", consumed["calories"])
+        status = DailySummaryStatus(summary_dict["status"])
+
+        entity.apply_update(
+            target_calories=target["calories"],
+            target_protein=target["protein"],
+            target_carbs=target["carbs"],
+            target_fats=target["fats"],
+            consumed_calories=net_calories,
+            consumed_protein=consumed["protein"],
+            consumed_carbs=consumed["carbs"],
+            consumed_fats=consumed["fats"],
+            activity_burned=0.0,
+            activity_type=None,
+            activity_duration_minutes=None,
+            status=status,
+        )
+
+        return self.summary_repository.save(entity)
+
+    def update_activity_by_id(
+        self,
+        *,
+        summary_id: str,
+        activity_burned: float | None = None,
+        activity_type: str | None = None,
+        activity_duration_minutes: float | None = None,
+    ) -> DailyIntakeSummary:
+        if not self.summary_repository:
+            raise RuntimeError("DailyIntakeSummaryRepository is not configured.")
+
+        entity = self.summary_repository.find_by_id(summary_id)
+        if not entity:
+            raise ValueError("Daily summary not found for this id.")
+
+        # Keep existing values if None provided.
+        new_activity_burned = activity_burned if activity_burned is not None else entity.activity_burned
+        new_type = activity_type if activity_type is not None else entity.activity_type
+        new_duration = (
+            activity_duration_minutes
+            if activity_duration_minutes is not None
+            else entity.activity_duration_minutes
+        )
+
+        summary_dict = self.get_daily_summary(
+            patient_id=entity.patient_id,
+            day=entity.day,
+            activity_burned=new_activity_burned,
+            activity_type=new_type,
+            activity_duration_minutes=new_duration,
+        )
+
+        target = summary_dict["target"]
+        consumed = summary_dict["consumed"]
+        net_calories = summary_dict.get("net_calories", consumed["calories"])
+        status = DailySummaryStatus(summary_dict["status"])
+
+        entity.apply_update(
+            target_calories=target["calories"],
+            target_protein=target["protein"],
+            target_carbs=target["carbs"],
+            target_fats=target["fats"],
+            consumed_calories=net_calories,
+            consumed_protein=consumed["protein"],
+            consumed_carbs=consumed["carbs"],
+            consumed_fats=consumed["fats"],
+            activity_burned=new_activity_burned,
+            activity_type=new_type,
+            activity_duration_minutes=new_duration,
+            status=status,
+        )
+
+        return self.summary_repository.save(entity)
+
+    def remove_activity_by_id(self, *, summary_id: str) -> DailyIntakeSummary:
+        if not self.summary_repository:
+            raise RuntimeError("DailyIntakeSummaryRepository is not configured.")
+
+        entity = self.summary_repository.find_by_id(summary_id)
+        if not entity:
+            raise ValueError("Daily summary not found for this id.")
+
+        summary_dict = self.get_daily_summary(
+            patient_id=entity.patient_id,
+            day=entity.day,
+            activity_burned=0.0,
+            activity_type=None,
+            activity_duration_minutes=None,
+        )
+
         target = summary_dict["target"]
         consumed = summary_dict["consumed"]
         net_calories = summary_dict.get("net_calories", consumed["calories"])

@@ -3,12 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import Optional
+from uuid import uuid4
 
 from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 
 
 @dataclass
 class DailyIntakeSummary:
+    id: str
     day: date
     patient_id: str
     target_calories: float
@@ -47,6 +49,7 @@ class DailyIntakeSummary:
     ) -> "DailyIntakeSummary":
         now = datetime.now(timezone.utc)
         return cls(
+            id=str(uuid4()),
             day=day,
             patient_id=patient_id,
             target_calories=target_calories,

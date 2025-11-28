@@ -32,6 +32,7 @@ class StepsCaloriesResponseDTO(BaseModel):
 
 
 class ActivityByDayResponseDTO(BaseModel):
+    id: Optional[str] = None
     user_id: str
     day: date
     activity_type: Optional[str] = None
@@ -46,3 +47,9 @@ class ActivityRangeResponseDTO(BaseModel):
     start_date: date
     end_date: date
     days: List[ActivityByDayResponseDTO]
+
+
+class ActivityUpdateRequestDTO(BaseModel):
+    activity_burned: Optional[float] = None
+    activity_type: Optional[str] = None
+    activity_duration_minutes: Optional[float] = None

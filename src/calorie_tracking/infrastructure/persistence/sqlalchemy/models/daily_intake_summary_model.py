@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
+from uuid import uuid4
 
-from sqlalchemy import Column, Date, DateTime, Float, String, PrimaryKeyConstraint
+from sqlalchemy import Column, Date, DateTime, Float, String, PrimaryKeyConstraint, UniqueConstraint
 
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
 
 
 class DailyIntakeSummaryModel(Base):
     __tablename__ = "daily_intake_summaries"
+    id = Column(String(50), primary_key=True, default=lambda: str(uuid4()))
     patient_id = Column(String(50), nullable=False)
     day = Column(Date, nullable=False)
 
@@ -37,5 +39,5 @@ class DailyIntakeSummaryModel(Base):
     )
 
     __table_args__ = (
-        PrimaryKeyConstraint("patient_id", "day", name="pk_daily_intake_summary"),
+        UniqueConstraint("patient_id", "day", name="uq_daily_intake_summary_patient_day"),
     )

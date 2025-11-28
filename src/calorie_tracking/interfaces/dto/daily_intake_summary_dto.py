@@ -21,6 +21,7 @@ class MacroBreakdownNoBmiDTO(BaseModel):
 
 
 class DailyIntakeSummaryDTO(BaseModel):
+    id: str | None = None
     day: date
     patient_id: str
     target: MacroBreakdownDTO
@@ -28,10 +29,13 @@ class DailyIntakeSummaryDTO(BaseModel):
     difference: MacroBreakdownDTO
     status: DailySummaryStatus
     activity_burned: float = 0
+    activity_type: str | None = None
+    activity_duration_minutes: float | None = None
     net_calories: float | None = None
 
 
 class DailyIntakeSummaryNoBmiDTO(BaseModel):
+    id: str | None = None
     day: date
     patient_id: str
     target: MacroBreakdownNoBmiDTO
@@ -39,4 +43,6 @@ class DailyIntakeSummaryNoBmiDTO(BaseModel):
     difference: MacroBreakdownNoBmiDTO
     status: DailySummaryStatus
     activity_burned: float = 0
+    activity_type: str | None = None
+    activity_duration_minutes: float | None = None
     net_calories: float | None = None

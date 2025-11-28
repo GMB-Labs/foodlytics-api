@@ -7,6 +7,10 @@ from src.calorie_tracking.domain.model.entities.daily_intake_summary import Dail
 
 class DailyIntakeSummaryRepository(ABC):
     @abstractmethod
+    def find_by_id(self, summary_id: str) -> Optional[DailyIntakeSummary]:
+        ...
+
+    @abstractmethod
     def find_by_patient_and_day(self, patient_id: str, day: date) -> Optional[DailyIntakeSummary]:
         pass
 

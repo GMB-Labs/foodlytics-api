@@ -11,6 +11,7 @@ from src.physical_activity.interfaces.dto.physical_activity_dto import (
     ActivityByDayResponseDTO,
     ActivityCaloriesResponseDTO,
     ActivityRangeResponseDTO,
+    ActivityUpdateRequestDTO,
     StepsActivityRequestDTO,
     StepsCaloriesResponseDTO,
 )
@@ -130,19 +131,52 @@ class PhysicalActivityController:
                     status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
                 ) from exc
 
-        @self.router.delete(
-            "/{user_id}",
+        # Eliminated delete-by-day endpoint per request.
+
+        @self.router.put(
+            "/by-id/{activity_id}",
             response_model=ActivityByDayResponseDTO,
             status_code=status.HTTP_200_OK,
-            summary="Elimina la actividad física registrada para un día.",
+            summary="Actualiza datos de actividad física por id.",
         )
-        def delete_activity_by_day(
-            user_id: str,
-            date: datetime,
+        def update_activity_by_id(
+            activity_id: str,
+            payload: ActivityUpdateRequestDTO,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            if (
+                payload.activity_burned is None
+                and payload.activity_type is None
+                and payload.activity_duration_minutes is None
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="At least one field must be provided to update activity.",
+                )
+            try:
+                return service.update_activity_by_id(
+                    activity_id=activity_id,
+                    activity_burned=payload.activity_burned,
+                    activity_type=payload.activity_type,
+                    activity_duration_minutes=payload.activity_duration_minutes,
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+                ) from exc
+
+        @self.router.delete(
+            "/by-id/{activity_id}",
+            response_model=ActivityByDayResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="Elimina la actividad física por id.",
+        )
+        def delete_activity_by_id(
+            activity_id: str,
             service: PhysicalActivityService = Depends(get_physical_activity_service),
         ):
             try:
-                return service.delete_activity_by_day(user_id=user_id, day=date.date())
+                return service.delete_activity_by_id(activity_id=activity_id)
             except ValueError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)

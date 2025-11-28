@@ -17,6 +17,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
 
     def _to_domain(self, model: DailyIntakeSummaryModel) -> DailyIntakeSummary:
         return DailyIntakeSummary(
+            id=model.id,
             day=model.day,
             patient_id=model.patient_id,
             target_calories=model.target_calories,
@@ -36,6 +37,7 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
         )
 
     def _sync_model(self, model: DailyIntakeSummaryModel, entity: DailyIntakeSummary) -> None:
+        model.id = entity.id
         model.patient_id = entity.patient_id
         model.day = entity.day
         model.target_calories = entity.target_calories
@@ -52,6 +54,16 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
         model.status = entity.status.value if isinstance(entity.status, DailySummaryStatus) else entity.status
         model.created_at = entity.created_at
         model.updated_at = entity.updated_at
+
+    def find_by_id(self, summary_id: str) -> Optional[DailyIntakeSummary]:
+        model = (
+            self.db.query(DailyIntakeSummaryModel)
+            .filter(DailyIntakeSummaryModel.id == summary_id)
+            .one_or_none()
+        )
+        if not model:
+            return None
+        return self._to_domain(model)
 
     def find_by_patient_and_day(self, patient_id: str, day: date) -> Optional[DailyIntakeSummary]:
         model = (
