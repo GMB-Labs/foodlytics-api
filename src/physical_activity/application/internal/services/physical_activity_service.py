@@ -79,7 +79,11 @@ class PhysicalActivityService:
 
         # Actualiza calorie tracking con el neto (calorías quemadas).
         self.comparison_service.finalize_day(
-            patient_id=user_id, day=day, activity_burned=burned_calories
+            patient_id=user_id,
+            day=day,
+            activity_burned=burned_calories,
+            activity_type=activity_type,
+            activity_duration_minutes=duration_minutes,
         )
 
         return {
@@ -107,7 +111,11 @@ class PhysicalActivityService:
         calories = round(calories, 2)
 
         self.comparison_service.finalize_day(
-            patient_id=user_id, day=day, activity_burned=calories
+            patient_id=user_id,
+            day=day,
+            activity_burned=calories,
+            activity_type="steps",
+            activity_duration_minutes=None,
         )
 
         return {

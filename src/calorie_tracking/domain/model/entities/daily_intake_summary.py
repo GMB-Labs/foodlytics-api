@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
+from typing import Optional
 
 from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 
@@ -19,6 +20,8 @@ class DailyIntakeSummary:
     consumed_carbs: float
     consumed_fats: float
     activity_burned: float
+    activity_type: Optional[str]
+    activity_duration_minutes: Optional[float]
     status: DailySummaryStatus
     created_at: datetime
     updated_at: datetime
@@ -38,6 +41,8 @@ class DailyIntakeSummary:
         consumed_carbs: float,
         consumed_fats: float,
         activity_burned: float,
+        activity_type: Optional[str],
+        activity_duration_minutes: Optional[float],
         status: DailySummaryStatus,
     ) -> "DailyIntakeSummary":
         now = datetime.now(timezone.utc)
@@ -53,6 +58,8 @@ class DailyIntakeSummary:
             consumed_carbs=consumed_carbs,
             consumed_fats=consumed_fats,
             activity_burned=activity_burned,
+            activity_type=activity_type,
+            activity_duration_minutes=activity_duration_minutes,
             status=status,
             created_at=now,
             updated_at=now,
@@ -70,6 +77,8 @@ class DailyIntakeSummary:
         consumed_carbs: float,
         consumed_fats: float,
         activity_burned: float,
+        activity_type: Optional[str],
+        activity_duration_minutes: Optional[float],
         status: DailySummaryStatus,
     ) -> None:
         self.target_calories = target_calories
@@ -81,5 +90,7 @@ class DailyIntakeSummary:
         self.consumed_carbs = consumed_carbs
         self.consumed_fats = consumed_fats
         self.activity_burned = activity_burned
+        self.activity_type = activity_type
+        self.activity_duration_minutes = activity_duration_minutes
         self.status = status
         self.updated_at = datetime.now(timezone.utc)

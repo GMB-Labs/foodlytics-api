@@ -20,6 +20,8 @@ class DailyIntakeSummaryModel(Base):
     consumed_carbs = Column(Float, nullable=False)
     consumed_fats = Column(Float, nullable=False)
     activity_burned = Column(Float, nullable=False, default=0.0)
+    activity_type = Column(String(50), nullable=True)
+    activity_duration_minutes = Column(Float, nullable=True)
 
     status = Column(String(30), nullable=False)
 

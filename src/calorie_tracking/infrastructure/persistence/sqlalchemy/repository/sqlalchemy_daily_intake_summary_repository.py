@@ -28,6 +28,8 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
             consumed_carbs=model.consumed_carbs,
             consumed_fats=model.consumed_fats,
             activity_burned=model.activity_burned,
+            activity_type=model.activity_type,
+            activity_duration_minutes=model.activity_duration_minutes,
             status=DailySummaryStatus(model.status),
             created_at=model.created_at,
             updated_at=model.updated_at,
@@ -45,6 +47,8 @@ class SqlAlchemyDailyIntakeSummaryRepository(DailyIntakeSummaryRepository):
         model.consumed_carbs = entity.consumed_carbs
         model.consumed_fats = entity.consumed_fats
         model.activity_burned = entity.activity_burned
+        model.activity_type = entity.activity_type
+        model.activity_duration_minutes = entity.activity_duration_minutes
         model.status = entity.status.value if isinstance(entity.status, DailySummaryStatus) else entity.status
         model.created_at = entity.created_at
         model.updated_at = entity.updated_at

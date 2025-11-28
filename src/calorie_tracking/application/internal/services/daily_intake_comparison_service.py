@@ -35,14 +35,32 @@ class DailyIntakeComparisonService:
         return getattr(existing, "activity_burned", 0.0) or 0.0
 
     def get_daily_summary(
-        self, *, patient_id: str, day: date, activity_burned: float | None = None
+        self,
+        *,
+        patient_id: str,
+        day: date,
+        activity_burned: float | None = None,
+        activity_type: str | None = None,
+        activity_duration_minutes: float | None = None,
     ) -> Dict:
         target = self.target_service.get_by_patient(patient_id)
         if not target:
             raise ValueError("Calorie target not found for this patient.")
 
-        if activity_burned is None:
-            activity_burned = self._current_activity_burned(patient_id, day)
+        existing = None
+        if activity_burned is None and self.summary_repository:
+            existing = self.summary_repository.find_by_patient_and_day(patient_id, day)
+            activity_burned = getattr(existing, "activity_burned", 0.0) or 0.0
+        elif activity_burned is None:
+            activity_burned = 0.0
+
+        if existing is None and self.summary_repository:
+            existing = self.summary_repository.find_by_patient_and_day(patient_id, day)
+
+        existing_type = getattr(existing, "activity_type", None) if existing else None
+        existing_duration = (
+            getattr(existing, "activity_duration_minutes", None) if existing else None
+        )
 
         meals: List[Meal] = self.meal_repository.get_by_day_and_user(day, patient_id)
 
@@ -77,6 +95,8 @@ class DailyIntakeComparisonService:
             "consumed": totals,
             "difference": diff,
             "activity_burned": activity_burned,
+            "activity_type": activity_type or existing_type,
+            "activity_duration_minutes": activity_duration_minutes or existing_duration,
             "net_calories": net_calories,
             "status": status.value,
         }
@@ -93,7 +113,13 @@ class DailyIntakeComparisonService:
         return round(profile.weight_kg / (height_m ** 2), 2)
 
     def finalize_day(
-        self, *, patient_id: str, day: date, activity_burned: float = 0.0
+        self,
+        *,
+        patient_id: str,
+        day: date,
+        activity_burned: float = 0.0,
+        activity_type: str | None = None,
+        activity_duration_minutes: float | None = None,
     ) -> DailyIntakeSummary:
         if not self.summary_repository:
             raise RuntimeError("DailyIntakeSummaryRepository is not configured.")
@@ -102,7 +128,11 @@ class DailyIntakeComparisonService:
         total_activity_burned = existing_burn + activity_burned
 
         summary_dict = self.get_daily_summary(
-            patient_id=patient_id, day=day, activity_burned=total_activity_burned
+            patient_id=patient_id,
+            day=day,
+            activity_burned=total_activity_burned,
+            activity_type=activity_type,
+            activity_duration_minutes=activity_duration_minutes,
         )
         target = summary_dict["target"]
         consumed = summary_dict["consumed"]
@@ -122,6 +152,8 @@ class DailyIntakeComparisonService:
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
                 activity_burned=total_activity_burned,
+                activity_type=summary_dict.get("activity_type"),
+                activity_duration_minutes=summary_dict.get("activity_duration_minutes"),
                 status=status,
             )
         else:
@@ -137,6 +169,8 @@ class DailyIntakeComparisonService:
                 consumed_carbs=consumed["carbs"],
                 consumed_fats=consumed["fats"],
                 activity_burned=total_activity_burned,
+                activity_type=summary_dict.get("activity_type"),
+                activity_duration_minutes=summary_dict.get("activity_duration_minutes"),
                 status=status,
             )
 
