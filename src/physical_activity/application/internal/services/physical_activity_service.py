@@ -340,3 +340,20 @@ class PhysicalActivityService:
             "end_date": end_date,
             "days": days,
         }
+
+    def get_steps_by_day(self, *, user_id: str, day: date) -> Dict:
+        """
+        Returns step activities and calories for the given user and day.
+        """
+        self._get_profile(user_id)
+
+        activities = self.activity_repository.list_by_user_and_day(user_id, day)
+        step_activities = [a for a in activities if self._is_step_activity(a.activity_type)]
+        total_calories = sum(a.calories_burned for a in step_activities)
+
+        return {
+            "user_id": user_id,
+            "day": day,
+            "step_activity_count": len(step_activities),
+            "calories_burned": total_calories,
+        }

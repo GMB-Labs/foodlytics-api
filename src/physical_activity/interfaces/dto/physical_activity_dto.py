@@ -67,3 +67,10 @@ class ActivityUpdateRequestDTO(BaseModel):
     activity_burned: Optional[float] = None
     activity_type: Optional[str] = None
     activity_duration_minutes: Optional[float] = None
+
+
+class StepsByDayResponseDTO(BaseModel):
+    user_id: str
+    day: date
+    step_activity_count: int
+    calories_burned: float

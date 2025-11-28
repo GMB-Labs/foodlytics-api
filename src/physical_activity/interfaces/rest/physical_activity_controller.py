@@ -13,6 +13,7 @@ from src.physical_activity.interfaces.dto.physical_activity_dto import (
     ActivityRangeResponseDTO,
     ActivityUpdateRequestDTO,
     StepsActivityRequestDTO,
+    StepsByDayResponseDTO,
     StepsCaloriesResponseDTO,
 )
 
@@ -208,3 +209,21 @@ class PhysicalActivityController:
                     else status.HTTP_404_NOT_FOUND
                 )
                 raise HTTPException(status_code=status_code, detail=message) from exc
+
+        @self.router.get(
+            "/{user_id}/steps",
+            response_model=StepsByDayResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="Obtiene actividades de pasos y calorías quemadas para un día.",
+        )
+        def get_steps_by_day(
+            user_id: str,
+            date: datetime,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.get_steps_by_day(user_id=user_id, day=date.date())
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+                ) from exc
