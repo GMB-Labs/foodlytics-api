@@ -130,6 +130,24 @@ class PhysicalActivityController:
                     status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
                 ) from exc
 
+        @self.router.delete(
+            "/{user_id}",
+            response_model=ActivityByDayResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="Elimina la actividad física registrada para un día.",
+        )
+        def delete_activity_by_day(
+            user_id: str,
+            date: datetime,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.delete_activity_by_day(user_id=user_id, day=date.date())
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+                ) from exc
+
         @self.router.get(
             "/{user_id}/range",
             response_model=ActivityRangeResponseDTO,

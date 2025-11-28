@@ -144,6 +144,28 @@ class PhysicalActivityService:
             "status": summary.get("status"),
         }
 
+    def delete_activity_by_day(self, *, user_id: str, day: date) -> Dict:
+        """
+        Removes activity data for a given user and day.
+        """
+        # Ensure the user exists before attempting deletion.
+        self._get_profile(user_id)
+
+        self.comparison_service.remove_activity(patient_id=user_id, day=day)
+        summary = self.comparison_service.get_daily_summary(
+            patient_id=user_id, day=day
+        )
+
+        return {
+            "user_id": user_id,
+            "day": day,
+            "activity_type": summary.get("activity_type"),
+            "activity_duration_minutes": summary.get("activity_duration_minutes"),
+            "activity_burned": summary.get("activity_burned", 0.0),
+            "net_calories": summary.get("net_calories"),
+            "status": summary.get("status"),
+        }
+
     def get_activity_range(self, *, user_id: str, start_date: date, end_date: date) -> Dict:
         """
         Returns activity data for a user across a date range.

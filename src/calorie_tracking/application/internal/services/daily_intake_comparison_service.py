@@ -176,6 +176,48 @@ class DailyIntakeComparisonService:
 
         return self.summary_repository.save(entity)
 
+    def remove_activity(
+        self, *, patient_id: str, day: date
+    ) -> DailyIntakeSummary:
+        """
+        Removes activity data for the given day (resets activity_burned/type/duration to zero/None).
+        """
+        if not self.summary_repository:
+            raise RuntimeError("DailyIntakeSummaryRepository is not configured.")
+
+        entity = self.summary_repository.find_by_patient_and_day(patient_id, day)
+        if not entity:
+            raise ValueError("Daily summary not found for this patient and day.")
+
+        summary_dict = self.get_daily_summary(
+            patient_id=patient_id,
+            day=day,
+            activity_burned=0.0,
+            activity_type=None,
+            activity_duration_minutes=None,
+        )
+        target = summary_dict["target"]
+        consumed = summary_dict["consumed"]
+        net_calories = summary_dict.get("net_calories", consumed["calories"])
+        status = DailySummaryStatus(summary_dict["status"])
+
+        entity.apply_update(
+            target_calories=target["calories"],
+            target_protein=target["protein"],
+            target_carbs=target["carbs"],
+            target_fats=target["fats"],
+            consumed_calories=net_calories,
+            consumed_protein=consumed["protein"],
+            consumed_carbs=consumed["carbs"],
+            consumed_fats=consumed["fats"],
+            activity_burned=0.0,
+            activity_type=None,
+            activity_duration_minutes=None,
+            status=status,
+        )
+
+        return self.summary_repository.save(entity)
+
     @staticmethod
     def _aggregate_meals(meals: List[Meal]) -> Dict[str, float]:
         totals = {
