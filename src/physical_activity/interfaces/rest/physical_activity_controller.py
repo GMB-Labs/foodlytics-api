@@ -41,6 +41,7 @@ class PhysicalActivityController:
                     activity_type=payload.activity_type,
                     duration_minutes=payload.duration_minutes,
                     intensity=payload.intensity,
+                    day=payload.day,
                 )
             except ValueError as exc:
                 raise HTTPException(
@@ -83,6 +84,7 @@ class PhysicalActivityController:
                 return service.estimate_from_steps(
                     user_id=payload.user_id,
                     steps=payload.steps,
+                    day=payload.day,
                     step_length_cm=payload.step_length_cm,
                 )
             except ValueError as exc:

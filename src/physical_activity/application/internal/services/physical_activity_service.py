@@ -1,8 +1,12 @@
 from datetime import date, timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import (
     DailyIntakeComparisonService,
+)
+from src.physical_activity.domain.model.physical_activity import PhysicalActivity
+from src.physical_activity.domain.repositories.physical_activity_repository import (
+    PhysicalActivityRepository,
 )
 from src.profile.domain.model.aggregates.profile import Profile
 from src.profile.domain.repositories.profile_repository import ProfileRepository
@@ -21,10 +25,12 @@ class PhysicalActivityService:
         ai_client: PhysicalActivityAIClient,
         profile_repository: ProfileRepository,
         comparison_service: DailyIntakeComparisonService,
+        activity_repository: PhysicalActivityRepository,
     ):
         self.ai_client = ai_client
         self.profile_repository = profile_repository
         self.comparison_service = comparison_service
+        self.activity_repository = activity_repository
 
     def _get_profile(self, user_id: str) -> Profile:
         profile = self.profile_repository.find_by_user_id(user_id)
@@ -67,15 +73,26 @@ class PhysicalActivityService:
         activity_type: str,
         duration_minutes: float,
         intensity: Optional[str] = None,
+        day: Optional[date] = None,
     ) -> Dict:
         profile = self._get_profile(user_id)
-        day = date.today()
+        day = day or date.today()
         burned_calories = self.ai_client.estimate_calories(
             weight_kg=profile.weight_kg,
             activity_type=activity_type,
             duration_minutes=duration_minutes,
             intensity=intensity,
         )
+
+        activity = PhysicalActivity.create(
+            user_id=user_id,
+            day=day,
+            activity_type=activity_type,
+            duration_minutes=duration_minutes,
+            intensity=intensity,
+            calories_burned=burned_calories,
+        )
+        self.activity_repository.save(activity)
 
         # Actualiza calorie tracking con el neto (calorías quemadas).
         self.comparison_service.finalize_day(
@@ -96,6 +113,7 @@ class PhysicalActivityService:
         *,
         user_id: str,
         steps: int,
+        day: Optional[date] = None,
         step_length_cm: Optional[float] = None,
     ) -> Dict:
         if steps <= 0:
@@ -103,12 +121,22 @@ class PhysicalActivityService:
 
         profile = self._get_profile(user_id)
         step_length_cm = step_length_cm or 70.0  # promedio aproximado
-        day = date.today()
+        day = day or date.today()
 
         distance_km = steps * step_length_cm / 100000  # cm -> km
         # Aproximación: kcal por km = peso_kg * 0.9
         calories = distance_km * profile.weight_kg * 0.9
         calories = round(calories, 2)
+
+        activity = PhysicalActivity.create(
+            user_id=user_id,
+            day=day,
+            activity_type="steps",
+            duration_minutes=None,
+            intensity=None,
+            calories_burned=calories,
+        )
+        self.activity_repository.save(activity)
 
         self.comparison_service.finalize_day(
             patient_id=user_id,
@@ -130,6 +158,9 @@ class PhysicalActivityService:
         # Ensure the user exists before querying summaries.
         self._get_profile(user_id)
 
+        activities = self.activity_repository.list_by_user_and_day(user_id, day)
+        total_burned = sum(a.calories_burned for a in activities)
+
         summary = self.comparison_service.get_daily_summary(
             patient_id=user_id, day=day
         )
@@ -138,9 +169,17 @@ class PhysicalActivityService:
             "id": summary.get("id"),
             "user_id": user_id,
             "day": day,
-            "activity_type": summary.get("activity_type"),
-            "activity_duration_minutes": summary.get("activity_duration_minutes"),
-            "activity_burned": summary.get("activity_burned", 0.0),
+            "activities": [
+                {
+                    "id": a.id,
+                    "activity_type": a.activity_type,
+                    "duration_minutes": a.duration_minutes,
+                    "intensity": a.intensity,
+                    "calories_burned": a.calories_burned,
+                }
+                for a in activities
+            ],
+            "activity_burned": total_burned,
             "net_calories": summary.get("net_calories"),
             "status": summary.get("status"),
         }
@@ -208,6 +247,8 @@ class PhysicalActivityService:
         days = []
         current = start_date
         while current <= end_date:
+            activities = self.activity_repository.list_by_user_and_day(user_id, current)
+            total_burned = sum(a.calories_burned for a in activities)
             summary = self.comparison_service.get_daily_summary(
                 patient_id=user_id, day=current
             )
@@ -216,9 +257,17 @@ class PhysicalActivityService:
                     "id": summary.get("id"),
                     "user_id": user_id,
                     "day": current,
-                    "activity_type": summary.get("activity_type"),
-                    "activity_duration_minutes": summary.get("activity_duration_minutes"),
-                    "activity_burned": summary.get("activity_burned", 0.0),
+                    "activities": [
+                        {
+                            "id": a.id,
+                            "activity_type": a.activity_type,
+                            "duration_minutes": a.duration_minutes,
+                            "intensity": a.intensity,
+                            "calories_burned": a.calories_burned,
+                        }
+                        for a in activities
+                    ],
+                    "activity_burned": total_burned,
                     "net_calories": summary.get("net_calories"),
                     "status": summary.get("status"),
                 }

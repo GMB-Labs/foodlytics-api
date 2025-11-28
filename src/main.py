@@ -13,6 +13,7 @@ from src.notifications.interfaces.rest.notification_controller import Notificati
 
 # Importaciones internas
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base, engine
+from src.physical_activity.infrastructure.persistence.sqlalchemy.models import PhysicalActivityModel
 from src.iam.infrastructure.external.auth0.auth0_machine_service import Auth0MachineService
 
 # Importar los controladores (bounded contexts)
