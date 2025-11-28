@@ -46,6 +46,28 @@ class PhysicalActivityController:
                     status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
                 ) from exc
 
+        @self.router.put(
+            "/ai-burn",
+            response_model=ActivityCaloriesResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="(PUT) Calcula calorías quemadas usando un servicio externo (IA).",
+        )
+        def estimate_with_ai_put(
+            payload: ActivityAIRequestDTO,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.estimate_with_ai(
+                    user_id=payload.user_id,
+                    activity_type=payload.activity_type,
+                    duration_minutes=payload.duration_minutes,
+                    intensity=payload.intensity,
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+                ) from exc
+
         @self.router.post(
             "/steps-burn",
             response_model=StepsCaloriesResponseDTO,
@@ -53,6 +75,28 @@ class PhysicalActivityController:
             summary="Convierte pasos diarios a calorías quemadas.",
         )
         def estimate_from_steps(
+            payload: StepsActivityRequestDTO,
+            service: PhysicalActivityService = Depends(get_physical_activity_service),
+        ):
+            try:
+                return service.estimate_from_steps(
+                    user_id=payload.user_id,
+                    steps=payload.steps,
+                    step_length_cm=payload.step_length_cm,
+                )
+            except ValueError as exc:
+                status_code = (
+                    status.HTTP_400_BAD_REQUEST if "steps must be" in str(exc) else status.HTTP_404_NOT_FOUND
+                )
+                raise HTTPException(status_code=status_code, detail=str(exc)) from exc
+
+        @self.router.put(
+            "/steps-burn",
+            response_model=StepsCaloriesResponseDTO,
+            status_code=status.HTTP_200_OK,
+            summary="(PUT) Convierte pasos diarios a calorías quemadas.",
+        )
+        def estimate_from_steps_put(
             payload: StepsActivityRequestDTO,
             service: PhysicalActivityService = Depends(get_physical_activity_service),
         ):
