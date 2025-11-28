@@ -15,6 +15,7 @@ from src.profile.infrastructure.dependencies import (
 from src.profile.interfaces.dto.profile_dto import ProfileResponseDTO
 from src.profile.interfaces.dto.user_registered_event_dto import UserRegisteredEventDTO
 from src.profile.interfaces.dto.update_profile_request_dto import UpdateProfileDTO
+from src.profile.interfaces.dto.update_weight_request_dto import UpdateWeightDTO
 from src.profile.interfaces.dto.nutritionist_invite_dto import (
     GenerateInviteResponseDTO,
     RedeemInviteRequestDTO,
@@ -65,6 +66,22 @@ class ProfileController:
                     picture_mime_type=file.content_type or "application/octet-stream",
                 )
                 profile = service.update_profile_picture(command)
+                return ProfileResponseDTO.from_domain(profile)
+            except ValueError as exc:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+        @self.router.patch(
+            "/{user_id}/weight",
+            response_model=ProfileResponseDTO,
+            summary="Actualiza solo el peso del paciente y sincroniza calorías objetivo e historial.",
+        )
+        def update_weight(
+            user_id: str,
+            payload: UpdateWeightDTO,
+            service: ProfileCommandService = Depends(get_profile_command_service),
+        ):
+            try:
+                profile = service.update_weight(user_id=user_id, weight_kg=payload.weight_kg)
                 return ProfileResponseDTO.from_domain(profile)
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

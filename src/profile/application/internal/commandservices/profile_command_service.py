@@ -35,6 +35,20 @@ class ProfileCommandService:
         self.profile_repository.save(profile)
         return profile
 
+    def update_weight(self, *, user_id: str, weight_kg: float) -> Profile:
+        profile = self.profile_repository.find_by_user_id(user_id)
+        if not profile:
+            raise ValueError("Profile not found.")
+
+        event = profile.update_weight(weight_kg=weight_kg)
+        self.profile_repository.save(profile)
+
+        # Publish to update calorie targets and weight history.
+        if self._event_bus:
+            self._event_bus.publish(event)
+
+        return profile
+
     def delete_profile(self, user_id: str) -> None:
         profile = self.profile_repository.find_by_user_id(user_id)
         if not profile:

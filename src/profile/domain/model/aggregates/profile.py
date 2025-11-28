@@ -3,6 +3,7 @@ from typing import Optional
 
 from src.profile.domain.model.commands.create_profile_command import CreateProfileCommand
 from src.profile.domain.model.commands.update_profile_command import UpdateProfileCommand
+from src.profile.domain.events.profile_updated_event import ProfileUpdatedEvent
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
 from src.profile.domain.model.value_objects.profile_picture import ProfilePicture
@@ -117,3 +118,19 @@ class Profile(AuditableAbstractAggregateRoot):
     def _touch(self) -> None:
         utc_minus_5 = timezone(timedelta(hours=-5))
         self.updated_at = datetime.now(utc_minus_5)
+
+    def update_weight(self, *, weight_kg: float) -> ProfileUpdatedEvent:
+        if weight_kg <= 0:
+            raise ValueError("weight_kg must be greater than zero.")
+        self.weight_kg = weight_kg
+        self._touch()
+        return ProfileUpdatedEvent(
+            user_id=self.user_id,
+            age=self.age,
+            height_cm=self.height_cm,
+            weight_kg=self.weight_kg,
+            gender=self.gender,
+            goal_type=self.goal_type,
+            activity_level=self.activity_level,
+            desired_weight_kg=self.desired_weight_kg,
+        )
