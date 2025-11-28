@@ -13,7 +13,7 @@ class MealCommandService:
         self.repository = repository
 
     def save_recognized_meal(self, dto: RegisterMealRequestDTO):
-        peru_now = datetime.now(PERU_TZ).replace(tzinfo=None)
+        peru_now = datetime.now(PERU_TZ)
 
         meal = Meal(
             id=str(uuid4()),

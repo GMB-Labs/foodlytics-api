@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -47,7 +47,8 @@ class DailyIntakeSummary:
         activity_duration_minutes: Optional[float],
         status: DailySummaryStatus,
     ) -> "DailyIntakeSummary":
-        now = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        now = datetime.now(utc_minus_5)
         return cls(
             id=str(uuid4()),
             day=day,
@@ -96,4 +97,5 @@ class DailyIntakeSummary:
         self.activity_type = activity_type
         self.activity_duration_minutes = activity_duration_minutes
         self.status = status
-        self.updated_at = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        self.updated_at = datetime.now(utc_minus_5)

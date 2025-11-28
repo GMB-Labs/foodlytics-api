@@ -1,7 +1,10 @@
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
+
+
+UTC_MINUS_5 = timezone(timedelta(hours=-5))
 
 
 @dataclass
@@ -27,7 +30,7 @@ class PhysicalActivity:
         calories_burned: float,
         intensity: Optional[str] = None,
     ) -> "PhysicalActivity":
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC_MINUS_5)
         return cls(
             id=str(uuid4()),
             user_id=user_id,
@@ -56,4 +59,4 @@ class PhysicalActivity:
             self.intensity = intensity
         if calories_burned is not None:
             self.calories_burned = calories_burned
-        self.updated_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(UTC_MINUS_5)

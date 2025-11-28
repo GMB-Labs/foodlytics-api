@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta, timezone
 
 from src.profile.domain.model.value_objects.gender import Gender
 from src.profile.domain.model.value_objects.goal_type import GoalType
@@ -20,7 +21,8 @@ class ProfileUpdatedEvent(DomainEvent):
         desired_weight_kg: float | None = None,
         occurred_on: datetime.datetime | None = None,
     ):
-        super().__init__(occurred_on=occurred_on or datetime.datetime.now(datetime.timezone.utc))
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        super().__init__(occurred_on=occurred_on or datetime.datetime.now(utc_minus_5))
         self.user_id = user_id
         self.age = age
         self.height_cm = height_cm

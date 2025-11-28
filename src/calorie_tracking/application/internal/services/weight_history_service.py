@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Dict
 
 from src.calorie_tracking.domain.repository.weight_history_repository import WeightHistoryRepository
@@ -57,7 +57,7 @@ class WeightHistoryService:
             user_id=user_id,
             day=day,
             weight_kg=weight_kg,
-            updated_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone(timedelta(hours=-5))),
         )
 
         return {

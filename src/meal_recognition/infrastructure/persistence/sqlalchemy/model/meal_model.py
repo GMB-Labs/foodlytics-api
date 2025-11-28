@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Float, DateTime
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from src.shared.infrastructure.persistence.sqlalchemy.engine import Base
 
 class MealModel(Base):
@@ -13,4 +13,5 @@ class MealModel(Base):
     protein = Column(Float, nullable=True)
     carbs = Column(Float, nullable=True)
     fats = Column(Float, nullable=True)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    _UTC_MINUS_5 = timezone(timedelta(hours=-5))
+    uploaded_at = Column(DateTime(timezone=True), default=lambda: datetime.now(MealModel._UTC_MINUS_5))

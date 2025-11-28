@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from sqlalchemy import Column, Date, DateTime, Float, String, PrimaryKeyConstraint, UniqueConstraint
@@ -30,14 +30,15 @@ class DailyIntakeSummaryModel(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(DailyIntakeSummaryModel._UTC_MINUS_5),
     )
     updated_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(DailyIntakeSummaryModel._UTC_MINUS_5),
     )
 
     __table_args__ = (
         UniqueConstraint("patient_id", "day", name="uq_daily_intake_summary_patient_day"),
     )
+    _UTC_MINUS_5 = timezone(timedelta(hours=-5))

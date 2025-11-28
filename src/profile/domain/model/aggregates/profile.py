@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from src.profile.domain.model.commands.create_profile_command import CreateProfileCommand
@@ -115,4 +115,5 @@ class Profile(AuditableAbstractAggregateRoot):
         return self._profile_picture
 
     def _touch(self) -> None:
-        self.updated_at = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        self.updated_at = datetime.now(utc_minus_5)

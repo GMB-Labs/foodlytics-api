@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from typing import Optional
 from uuid import uuid4
@@ -28,6 +28,7 @@ class Meal:
         carbs: float,
         fats: float
     ):
+        peru_tz = timezone(timedelta(hours=-5))
         return Meal(
             id=str(uuid4()),
             name=name,
@@ -37,5 +38,5 @@ class Meal:
             protein=protein,
             carbs=carbs,
             fats=fats,
-            uploaded_at=datetime.utcnow()
+            uploaded_at=datetime.now(peru_tz)
         )

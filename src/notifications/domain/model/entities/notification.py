@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from uuid import uuid4
 
@@ -28,7 +28,8 @@ class Notification:
         metadata: Optional[Dict[str, Any]] = None,
         notification_id: Optional[str] = None,
     ) -> "Notification":
-        now = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        now = datetime.now(utc_minus_5)
         generated_id = notification_id or str(uuid4())
         return Notification(
             notification_id=generated_id,
@@ -43,4 +44,5 @@ class Notification:
 
     def mark_status(self, status: NotificationStatus) -> None:
         self.status = status
-        self.updated_at = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        self.updated_at = datetime.now(utc_minus_5)

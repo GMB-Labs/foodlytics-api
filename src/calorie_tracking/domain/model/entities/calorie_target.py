@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Tuple
 
 
@@ -25,7 +25,8 @@ class CalorieTarget:
         carb_grams: float,
         fat_grams: float,
     ) -> "CalorieTarget":
-        now = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        now = datetime.now(utc_minus_5)
         return cls(
             patient_id=patient_id,
             calories=calories,
@@ -48,4 +49,5 @@ class CalorieTarget:
         self.protein_grams = protein_grams
         self.carb_grams = carb_grams
         self.fat_grams = fat_grams
-        self.updated_at = datetime.now(timezone.utc)
+        utc_minus_5 = timezone(timedelta(hours=-5))
+        self.updated_at = datetime.now(utc_minus_5)
