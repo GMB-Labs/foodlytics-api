@@ -51,9 +51,6 @@ class CalorieTrackingController:
         ):
             try:
                 summary = service.get_daily_summary(patient_id=patient_id, day=day)
-                for section in ("target", "consumed", "difference"):
-                    if section in summary and isinstance(summary[section], dict):
-                        summary[section].pop("bmi", None)
                 return summary
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc

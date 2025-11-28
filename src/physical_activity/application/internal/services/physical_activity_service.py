@@ -161,8 +161,9 @@ class PhysicalActivityService:
         activities = self.activity_repository.list_by_user_and_day(user_id, day)
         total_burned = sum(a.calories_burned for a in activities)
 
+        # Recompute summary using the actual total burned from activities.
         summary = self.comparison_service.get_daily_summary(
-            patient_id=user_id, day=day
+            patient_id=user_id, day=day, activity_burned=total_burned
         )
 
         return {
@@ -250,7 +251,7 @@ class PhysicalActivityService:
             activities = self.activity_repository.list_by_user_and_day(user_id, current)
             total_burned = sum(a.calories_burned for a in activities)
             summary = self.comparison_service.get_daily_summary(
-                patient_id=user_id, day=current
+                patient_id=user_id, day=current, activity_burned=total_burned
             )
             days.append(
                 {

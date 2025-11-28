@@ -74,8 +74,6 @@ class DailyIntakeComparisonService:
             "fats": target.fat_grams - totals["fats"],
         }
 
-        bmi = self._calculate_bmi(patient_id)
-
         status = DailySummaryStatus.WITHIN_TARGET
         if net_calories > target.calories:
             status = DailySummaryStatus.OVER_TARGET
@@ -91,13 +89,10 @@ class DailyIntakeComparisonService:
                 "protein": target.protein_grams,
                 "carbs": target.carb_grams,
                 "fats": target.fat_grams,
-                "bmi": bmi,
             },
             "consumed": totals,
             "difference": diff,
             "activity_burned": activity_burned,
-            "activity_type": activity_type or existing_type,
-            "activity_duration_minutes": activity_duration_minutes or existing_duration,
             "net_calories": net_calories,
             "status": status.value,
         }
