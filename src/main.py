@@ -31,7 +31,7 @@ app = FastAPI(
     title='Foodlytics API',
     version='1.0',
     description='API for Foodlytics application',
-    # dependencies=[Depends(get_token_validation_service().verify_token)]
+    # dependencies=[Depends(require_auth)]  
 )
 logging.getLogger("src.shared.infrastructure.events.in_memory_event_bus").setLevel(logging.DEBUG)
 
@@ -96,12 +96,12 @@ app.include_router(culqi_payments_router, prefix=API_PREFIX)
 # ==============================================
 #  Endpoints de diagnóstico
 # ==============================================
-@app.get("/health")
+@app.get("/health", tags=["DevTools"])
 def health():
     """Verifica que el servicio esté corriendo."""
     return {"status": "ok"}
 
-@app.get("/db-check")
+@app.get("/db-check", tags=["DevTools"])
 def db_check():
     """Verifica conexión a la base de datos."""
     inspector = inspect(engine)
