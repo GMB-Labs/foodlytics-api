@@ -194,43 +194,115 @@ class PhysicalActivityService:
         activity_duration_minutes: Optional[float] = None,
     ) -> Dict:
         """
-        Updates activity data by its id.
+        Updates a physical activity by its id and re-syncs the daily summary.
         """
-        entity = self.comparison_service.update_activity_by_id(
-            summary_id=activity_id,
-            activity_burned=activity_burned,
+        activity = self.activity_repository.find_by_id(activity_id)
+        if not activity:
+            raise ValueError("Physical activity not found for this id.")
+
+        # Track current burned calories stored in the summary to compute the delta.
+        existing_burn = self.comparison_service._current_activity_burned(  # pylint: disable=protected-access
+            activity.user_id, activity.day
+        )
+
+        activity.apply_update(
             activity_type=activity_type,
-            activity_duration_minutes=activity_duration_minutes,
+            duration_minutes=activity_duration_minutes,
+            calories_burned=activity_burned,
         )
+        self.activity_repository.save(activity)
+
+        activities = self.activity_repository.list_by_user_and_day(activity.user_id, activity.day)
+        total_burned = sum(a.calories_burned for a in activities)
+        delta = total_burned - existing_burn
+
+        # Keep the calorie tracking summary consistent with the new total.
+        if delta != 0:
+            try:
+                self.comparison_service.finalize_day(
+                    patient_id=activity.user_id,
+                    day=activity.day,
+                    activity_burned=delta,
+                    activity_type=None,
+                    activity_duration_minutes=None,
+                )
+            except RuntimeError:
+                # If the summary repository is not configured, we still return the computed summary.
+                pass
+
         summary = self.comparison_service.get_daily_summary(
-            patient_id=entity.patient_id, day=entity.day
+            patient_id=activity.user_id, day=activity.day, activity_burned=total_burned
         )
+
         return {
             "id": summary.get("id"),
-            "user_id": entity.patient_id,
-            "day": entity.day,
-            "activity_type": summary.get("activity_type"),
-            "activity_duration_minutes": summary.get("activity_duration_minutes"),
-            "activity_burned": summary.get("activity_burned", 0.0),
+            "user_id": activity.user_id,
+            "day": activity.day,
+            "activities": [
+                {
+                    "id": a.id,
+                    "activity_type": a.activity_type,
+                    "duration_minutes": a.duration_minutes,
+                    "intensity": a.intensity,
+                    "calories_burned": a.calories_burned,
+                }
+                for a in activities
+            ],
+            "activity_burned": total_burned,
             "net_calories": summary.get("net_calories"),
             "status": summary.get("status"),
         }
 
     def delete_activity_by_id(self, *, activity_id: str) -> Dict:
         """
-        Removes activity data by its id.
+        Removes a physical activity by its id and re-syncs the daily summary.
         """
-        entity = self.comparison_service.remove_activity_by_id(summary_id=activity_id)
-        summary = self.comparison_service.get_daily_summary(
-            patient_id=entity.patient_id, day=entity.day
+        activity = self.activity_repository.find_by_id(activity_id)
+        if not activity:
+            raise ValueError("Physical activity not found for this id.")
+
+        existing_burn = self.comparison_service._current_activity_burned(  # pylint: disable=protected-access
+            activity.user_id, activity.day
         )
+
+        self.activity_repository.delete(activity)
+
+        remaining = self.activity_repository.list_by_user_and_day(activity.user_id, activity.day)
+        total_burned = sum(a.calories_burned for a in remaining)
+        delta = total_burned - existing_burn
+
+        # Update the stored summary so net calories reflect the deletion.
+        if delta != 0:
+            try:
+                self.comparison_service.finalize_day(
+                    patient_id=activity.user_id,
+                    day=activity.day,
+                    activity_burned=delta,
+                    activity_type=None,
+                    activity_duration_minutes=None,
+                )
+            except RuntimeError:
+                pass
+
+        summary = self.comparison_service.get_daily_summary(
+            patient_id=activity.user_id, day=activity.day, activity_burned=total_burned
+        )
+
         return {
             "id": summary.get("id"),
-            "user_id": entity.patient_id,
-            "day": entity.day,
-            "activity_type": summary.get("activity_type"),
-            "activity_duration_minutes": summary.get("activity_duration_minutes"),
-            "activity_burned": summary.get("activity_burned", 0.0),
+            "user_id": activity.user_id,
+            "day": activity.day,
+            "activities": [
+                {
+                    "id": a.id,
+                    "activity_type": a.activity_type,
+                    "duration_minutes": a.duration_minutes,
+                    "intensity": a.intensity,
+                    "calories_burned": a.calories_burned,
+                }
+                for a in remaining
+            ],
+            "activity_burned": total_burned,
             "net_calories": summary.get("net_calories"),
             "status": summary.get("status"),
         }
