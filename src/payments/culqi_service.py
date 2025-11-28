@@ -63,3 +63,21 @@ class CulqiService:
                 message = response.text
             raise ValueError(f"Culqi order error {response.status_code}: {message}")
         return response.json()
+
+    def confirm_order(self, order_id: str) -> Dict[str, Any]:
+        """
+        Confirms an order (enables it to be paid) when it is in 'created' state.
+        """
+        url = f"{self.base_url}/orders/{order_id}/confirm"
+        headers = {
+            "Authorization": f"Bearer {self.private_key}",
+            "Content-Type": "application/json",
+        }
+        response = requests.post(url, headers=headers)
+        if response.status_code != 200:
+            try:
+                message = response.json()
+            except Exception:  # pragma: no cover
+                message = response.text
+            raise ValueError(f"Culqi order confirm error {response.status_code}: {message}")
+        return response.json()
