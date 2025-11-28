@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
 
 from src.payments.culqi_service import CulqiService
@@ -109,6 +109,17 @@ def create_order(request: OrderRequest):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return order_response
+
+
+@router.post("/orders/{order_id}/confirm", status_code=status.HTTP_200_OK)
+def confirm_order(order_id: str):
+    service = CulqiService()
+    try:
+        return service.confirm_order(order_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/webhook")
