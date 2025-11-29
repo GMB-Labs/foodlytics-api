@@ -11,6 +11,8 @@ from src.meal_recognition.interfaces.dto.meal_response_dto import MealResponseDT
 from src.meal_recognition.interfaces.dto.register_meal_request_dto import RegisterMealRequestDTO
 from src.meal_recognition.infrastructure.persistence.sqlalchemy.repository.sqlalchemy_meal_repository import SqlAlchemyMealRepository
 from src.shared.infrastructure.persistence.sqlalchemy.session import get_db
+from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import DailyIntakeComparisonService
+from src.calorie_tracking.infrastructure.dependencies import get_daily_comparison_service
 
 
 def get_meal_repository(db = Depends(get_db)):
@@ -61,10 +63,11 @@ class MealRecognitionController:
         @self.router.post("/register-meal", status_code=status.HTTP_201_CREATED)
         def register_meal(
             dto: RegisterMealRequestDTO,
-            repo = Depends(get_meal_repository)
+            repo = Depends(get_meal_repository),
+            comparison_service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
         ):
             service = MealCommandService(repo)
-            meal = service.save_recognized_meal(dto)
+            meal = service.save_recognized_meal(dto, comparison_service)
             return {
                 "id": meal.id,
                 "uploaded_at": meal.uploaded_at

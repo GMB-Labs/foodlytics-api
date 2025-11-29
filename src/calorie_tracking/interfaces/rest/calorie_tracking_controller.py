@@ -15,10 +15,7 @@ from src.calorie_tracking.infrastructure.dependencies import (
     get_weight_history_service,
 )
 from src.calorie_tracking.interfaces.dto.calorie_target_dto import CalorieTargetResponseDTO
-from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import (
-    DailyIntakeSummaryDTO,
-    DailyIntakeSummaryNoBmiDTO,
-)
+from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import DailyIntakeSummaryNoBmiDTO
 from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import (
     NutritionistDailySummariesDTO,
     NutritionistDailyRangeSummariesDTO,
@@ -52,23 +49,6 @@ class CalorieTrackingController:
             try:
                 summary = service.get_daily_summary(patient_id=patient_id, day=day)
                 return summary
-            except ValueError as exc:
-                raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-        @self.router.post(
-            "/{patient_id}/daily-summary/finalize",
-            response_model=DailyIntakeSummaryDTO,
-            summary="Cierra el día guardando el consumo vs target",
-        )
-        def finalize_daily_summary(
-            patient_id: str,
-            day: date,
-            service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
-        ):
-            try:
-                view = service.get_daily_summary(patient_id=patient_id, day=day)
-                service.finalize_day(patient_id=patient_id, day=day)
-                return view
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -144,6 +124,9 @@ class CalorieTrackingController:
                     else status.HTTP_404_NOT_FOUND
                 )
                 raise HTTPException(status_code=status_code, detail=message) from exc
+
+
+
 
 
         @self.router.get("", response_model=List[CalorieTargetResponseDTO])
