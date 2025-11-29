@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from typing import List
 
 from src.meal_recognition.domain.model.entities.meal import Meal
@@ -10,6 +10,7 @@ from src.meal_recognition.infrastructure.persistence.sqlalchemy.model.meal_model
 class SqlAlchemyMealRepository(MealRepository):
     def __init__(self, session):
         self.session = session
+        self._peru_tz = timezone(timedelta(hours=-5))
 
     def save(self, meal: Meal) -> Meal:
         model = MealModel(
@@ -28,8 +29,11 @@ class SqlAlchemyMealRepository(MealRepository):
         return meal
 
     def get_by_day_and_user(self, day: date, user_id: str) -> List[Meal]:
-        start_of_day = datetime.combine(day, time.min)
-        end_of_day = start_of_day + timedelta(days=1)
+        # Use local (UTC-5) day boundaries and compare in UTC to avoid crossing into the next/previous day.
+        start_local = datetime.combine(day, time.min, tzinfo=self._peru_tz)
+        end_local = start_local + timedelta(days=1)
+        start_of_day = start_local.astimezone(timezone.utc)
+        end_of_day = end_local.astimezone(timezone.utc)
         records = (
             self.session.query(MealModel)
             .filter(
