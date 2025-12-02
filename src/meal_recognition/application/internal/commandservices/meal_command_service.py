@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from src.meal_recognition.domain.model.entities.meal import Meal
 from src.meal_recognition.interfaces.dto.register_meal_request_dto import RegisterMealRequestDTO
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import (
+from src.calorie_tracking.application.internal.commandservices.daily_intake_comparison_service import (
     DailyIntakeComparisonService,
 )
 

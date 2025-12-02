@@ -1,12 +1,18 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import DailyIntakeComparisonService
-from src.calorie_tracking.application.internal.services.nutritionist_daily_results_service import (
+from src.calorie_tracking.application.internal.queryservices import (
+    CalorieTargetQueryService,
+    DailyIntakeSummaryQueryService,
+    NutritionistDailyResultsQueryService,
+    WeightHistoryQueryService,
+)
+from src.calorie_tracking.application.internal.commandservices.calorie_target_service import CalorieTargetService
+from src.calorie_tracking.application.internal.commandservices.daily_intake_comparison_service import DailyIntakeComparisonService
+from src.calorie_tracking.application.internal.commandservices.nutritionist_daily_results_service import (
     NutritionistDailyResultsService,
 )
-from src.calorie_tracking.application.internal.services.weight_history_service import WeightHistoryService
+from src.calorie_tracking.application.internal.commandservices.weight_history_service import WeightHistoryService
 from src.calorie_tracking.domain.repository.calorie_target_repository import CalorieTargetRepository
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository
 from src.calorie_tracking.domain.repository.weight_history_repository import WeightHistoryRepository
@@ -31,6 +37,11 @@ def get_calorie_target_service(
 ) -> CalorieTargetService:
     return CalorieTargetService(repository)
 
+def get_calorie_target_query_service(
+    repository: CalorieTargetRepository = Depends(get_calorie_target_repository),
+) -> CalorieTargetQueryService:
+    return CalorieTargetQueryService(repository)
+
 
 def get_meal_repository(db: Session = Depends(get_db)) -> MealRepository:
     return SqlAlchemyMealRepository(db)
@@ -51,6 +62,12 @@ def get_daily_comparison_service(
     return DailyIntakeComparisonService(meal_repo, target_service, summary_repo, profile_repo)
 
 
+def get_daily_summary_query_service(
+    comparison_service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
+) -> DailyIntakeSummaryQueryService:
+    return DailyIntakeSummaryQueryService(comparison_service)
+
+
 def get_nutritionist_daily_results_service(
     profile_repo: ProfileRepository = Depends(get_profile_repository),
     comparison_service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
@@ -58,8 +75,22 @@ def get_nutritionist_daily_results_service(
     return NutritionistDailyResultsService(profile_repo, comparison_service)
 
 
+def get_nutritionist_daily_results_query_service(
+    profile_repo: ProfileRepository = Depends(get_profile_repository),
+    daily_summary_query_service: DailyIntakeSummaryQueryService = Depends(get_daily_summary_query_service),
+) -> NutritionistDailyResultsQueryService:
+    return NutritionistDailyResultsQueryService(profile_repo, daily_summary_query_service)
+
+
 def get_weight_history_service(
     weight_history_repo: WeightHistoryRepository = Depends(get_weight_history_repository),
     profile_repo: ProfileRepository = Depends(get_profile_repository),
 ) -> WeightHistoryService:
     return WeightHistoryService(weight_history_repo, profile_repo)
+
+
+def get_weight_history_query_service(
+    weight_history_repo: WeightHistoryRepository = Depends(get_weight_history_repository),
+    profile_repo: ProfileRepository = Depends(get_profile_repository),
+) -> WeightHistoryQueryService:
+    return WeightHistoryQueryService(weight_history_repo, profile_repo)

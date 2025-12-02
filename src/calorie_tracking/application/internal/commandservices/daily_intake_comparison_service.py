@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Dict, List
 
-from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
+from src.calorie_tracking.application.internal.commandservices.calorie_target_service import CalorieTargetService
 from src.calorie_tracking.domain.model.entities.daily_intake_summary import DailyIntakeSummary
 from src.calorie_tracking.domain.model.value_objects.daily_summary_status import DailySummaryStatus
 from src.calorie_tracking.domain.repository.daily_intake_summary_repository import DailyIntakeSummaryRepository

@@ -4,7 +4,7 @@ from src.iam.domain.model.aggregates.user import User
 
 class UserService(ABC):
     """
-    Abstract base class for user services.
+    Abstract base class for user commandservices.
     """
     @abstractmethod
     def get_or_create_from_payload(self, payload: Dict) -> User:

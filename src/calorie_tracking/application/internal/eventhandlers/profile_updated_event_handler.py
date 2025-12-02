@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
+from src.calorie_tracking.application.internal.commandservices.calorie_target_service import CalorieTargetService
 from src.calorie_tracking.infrastructure.persistence.sqlalchemy.repository import SqlAlchemyCalorieTargetRepository
 from src.iam.infrastructure.persistence.sqlalchemy.repositories.user_repository_impl import SqlAlchemyUserRepository
 from src.profile.domain.events import ProfileUpdatedEvent

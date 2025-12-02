@@ -3,29 +3,35 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import DailyIntakeComparisonService
-from src.calorie_tracking.application.internal.services.nutritionist_daily_results_service import (
-    NutritionistDailyResultsService,
+from src.calorie_tracking.application.internal.queryservices import (
+    CalorieTargetQueryService,
+    DailyIntakeSummaryQueryService,
+    NutritionistDailyResultsQueryService,
+    WeightHistoryQueryService,
 )
 from src.calorie_tracking.infrastructure.dependencies import (
-    get_calorie_target_service,
-    get_daily_comparison_service,
-    get_nutritionist_daily_results_service,
-    get_weight_history_service,
+    get_calorie_target_query_service,
+    get_daily_summary_query_service,
+    get_nutritionist_daily_results_query_service,
+    get_weight_history_query_service,
 )
 from src.calorie_tracking.interfaces.dto.calorie_target_dto import CalorieTargetResponseDTO
-from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import DailyIntakeSummaryNoBmiDTO
+from src.calorie_tracking.interfaces.dto.daily_intake_summary_no_bmi_dto import DailyIntakeSummaryNoBmiDTO
 from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import (
     NutritionistDailySummariesDTO,
+)
+from src.calorie_tracking.interfaces.dto.nutritionist_daily_range_summaries_dto import (
     NutritionistDailyRangeSummariesDTO,
 )
-from src.calorie_tracking.interfaces.dto.weight_history_dto import (
+from src.calorie_tracking.interfaces.dto.weight_history_entry_response_dto import (
     WeightHistoryEntryResponseDTO,
+)
+from src.calorie_tracking.interfaces.dto.weight_history_upsert_request_dto import (
     WeightHistoryUpsertRequestDTO,
+)
+from src.calorie_tracking.interfaces.dto.weight_history_response_dto import (
     WeightHistoryResponseDTO,
 )
-from src.calorie_tracking.application.internal.services.weight_history_service import WeightHistoryService
 from src.profile.domain.repositories.profile_repository import ProfileRepository
 from src.profile.infrastructure.dependencies import get_profile_repository
 
@@ -44,7 +50,7 @@ class CalorieTrackingController:
         def get_daily_summary(
             patient_id: str,
             day: date,
-            service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
+            service: DailyIntakeSummaryQueryService = Depends(get_daily_summary_query_service),
         ):
             try:
                 summary = service.get_daily_summary(patient_id=patient_id, day=day)
@@ -60,7 +66,7 @@ class CalorieTrackingController:
         def get_daily_summaries_by_nutritionist(
             nutritionist_id: str,
             day: date,
-            service: NutritionistDailyResultsService = Depends(get_nutritionist_daily_results_service),
+            service: NutritionistDailyResultsQueryService = Depends(get_nutritionist_daily_results_query_service),
         ):
             try:
                 summaries, skipped = service.get_patient_summaries_for_day(
@@ -84,7 +90,7 @@ class CalorieTrackingController:
             nutritionist_id: str,
             start_date: date,
             end_date: date,
-            service: NutritionistDailyResultsService = Depends(get_nutritionist_daily_results_service),
+            service: NutritionistDailyResultsQueryService = Depends(get_nutritionist_daily_results_query_service),
         ):
             try:
                 days = service.get_patient_summaries_for_range(
@@ -110,7 +116,7 @@ class CalorieTrackingController:
             patient_id: str,
             start_date: date,
             end_date: date,
-            service: WeightHistoryService = Depends(get_weight_history_service),
+            service: WeightHistoryQueryService = Depends(get_weight_history_query_service),
         ):
             try:
                 return service.get_history(
@@ -125,13 +131,9 @@ class CalorieTrackingController:
                 )
                 raise HTTPException(status_code=status_code, detail=message) from exc
 
-
-
-
-
         @self.router.get("", response_model=List[CalorieTargetResponseDTO])
         def list_targets(
-            service: CalorieTargetService = Depends(get_calorie_target_service),
+            service: CalorieTargetQueryService = Depends(get_calorie_target_query_service),
             profile_repo: ProfileRepository = Depends(get_profile_repository),
         ):
             targets = service.list_all()
@@ -146,7 +148,7 @@ class CalorieTrackingController:
         @self.router.get("/{patient_id}", response_model=CalorieTargetResponseDTO)
         def get_target(
             patient_id: str,
-            service: CalorieTargetService = Depends(get_calorie_target_service),
+            service: CalorieTargetQueryService = Depends(get_calorie_target_query_service),
             profile_repo: ProfileRepository = Depends(get_profile_repository),
         ):
             target = service.get_by_patient(patient_id)

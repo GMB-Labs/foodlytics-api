@@ -11,7 +11,7 @@ from src.meal_recognition.interfaces.dto.meal_response_dto import MealResponseDT
 from src.meal_recognition.interfaces.dto.register_meal_request_dto import RegisterMealRequestDTO
 from src.meal_recognition.infrastructure.persistence.sqlalchemy.repository.sqlalchemy_meal_repository import SqlAlchemyMealRepository
 from src.shared.infrastructure.persistence.sqlalchemy.session import get_db
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import DailyIntakeComparisonService
+from src.calorie_tracking.application.internal.commandservices.daily_intake_comparison_service import DailyIntakeComparisonService
 from src.calorie_tracking.infrastructure.dependencies import get_daily_comparison_service
 
 

@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import (
+from src.calorie_tracking.application.internal.commandservices.daily_intake_comparison_service import (
     DailyIntakeComparisonService,
 )
 from src.calorie_tracking.infrastructure.dependencies import get_daily_comparison_service

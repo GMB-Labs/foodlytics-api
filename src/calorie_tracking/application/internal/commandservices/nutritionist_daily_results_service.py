@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from typing import Dict, List, Tuple
 
-from src.calorie_tracking.application.internal.services.daily_intake_comparison_service import (
+from src.calorie_tracking.application.internal.commandservices.daily_intake_comparison_service import (
     DailyIntakeComparisonService,
 )
 from src.profile.domain.repositories.profile_repository import ProfileRepository
