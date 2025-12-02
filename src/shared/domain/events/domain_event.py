@@ -11,7 +11,7 @@ class DomainEvent:
 
     event_id: UUID = field(default_factory=uuid4)
     occurred_on: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(timezone.utc-5430)  # Colombia timezone
     )
 
     def to_primitives(self) -> dict:

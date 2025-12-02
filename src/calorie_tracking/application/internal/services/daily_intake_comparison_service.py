@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict, List
 
 from src.calorie_tracking.application.internal.services.calorie_target_service import CalorieTargetService
@@ -213,6 +213,24 @@ class DailyIntakeComparisonService:
         )
 
         return self.summary_repository.save(entity)
+
+    def get_consumed_for_range(
+        self, *, patient_id: str, start_date: date, end_date: date
+    ) -> List[Dict]:
+        """
+        Returns only the consumed macros (plus BMI) for each day in the range.
+        """
+        if end_date < start_date:
+            raise ValueError("start_date must be on or before end_date.")
+
+        results: List[Dict] = []
+        current = start_date
+        while current <= end_date:
+            summary = self.get_daily_summary(patient_id=patient_id, day=current)
+            results.append({"day": current, "consumed": summary["consumed"]})
+            current += timedelta(days=1)
+
+        return results
 
     def update_activity_by_id(
         self,

@@ -15,7 +15,7 @@ from src.calorie_tracking.infrastructure.dependencies import (
     get_weight_history_service,
 )
 from src.calorie_tracking.interfaces.dto.calorie_target_dto import CalorieTargetResponseDTO
-from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import DailyIntakeSummaryNoBmiDTO
+from src.calorie_tracking.interfaces.dto.daily_intake_summary_dto import DailyIntakeSummaryNoBmiDTO, PatientConsumedRangeDTO
 from src.calorie_tracking.interfaces.dto.nutritionist_daily_summaries_dto import (
     NutritionistDailySummariesDTO,
     NutritionistDailyRangeSummariesDTO,
@@ -51,6 +51,34 @@ class CalorieTrackingController:
                 return summary
             except ValueError as exc:
                 raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+        @self.router.get(
+            "/{patient_id}/daily-summaries/range",
+            response_model=PatientConsumedRangeDTO,
+            summary="Consumed macros (with BMI) for a patient across a date range",
+        )
+        def get_patient_macros_range(
+            patient_id: str,
+            start_date: date,
+            end_date: date,
+            service: DailyIntakeComparisonService = Depends(get_daily_comparison_service),
+        ):
+            try:
+                days = service.get_consumed_for_range(
+                    patient_id=patient_id, start_date=start_date, end_date=end_date
+                )
+                return {
+                    "patient_id": patient_id,
+                    "days": days,
+                }
+            except ValueError as exc:
+                message = str(exc)
+                status_code = (
+                    status.HTTP_400_BAD_REQUEST
+                    if "start_date must be on or before end_date." in message
+                    else status.HTTP_404_NOT_FOUND
+                )
+                raise HTTPException(status_code=status_code, detail=message) from exc
 
         @self.router.get(
             "/nutritionists/{nutritionist_id}/daily-summaries",

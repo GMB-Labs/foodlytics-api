@@ -42,3 +42,13 @@ class DailyIntakeSummaryNoBmiDTO(BaseModel):
     status: DailySummaryStatus
     activity_burned: float = 0
     net_calories: float | None = None
+
+
+class DailyConsumedDTO(BaseModel):
+    day: date
+    consumed: MacroBreakdownNoBmiDTO
+
+
+class PatientConsumedRangeDTO(BaseModel):
+    patient_id: str
+    days: list[DailyConsumedDTO]
