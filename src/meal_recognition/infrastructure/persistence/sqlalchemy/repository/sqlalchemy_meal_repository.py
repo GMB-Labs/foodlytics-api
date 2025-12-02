@@ -48,6 +48,12 @@ class SqlAlchemyMealRepository(MealRepository):
 
     def _to_entity(self, model: MealModel) -> Meal:
         meal_type = MealType(model.meal_type) if model.meal_type else None
+        uploaded_at = model.uploaded_at
+        # Normalize to Peru TZ for consistent API responses
+        if uploaded_at.tzinfo is None:
+            uploaded_at = uploaded_at.replace(tzinfo=timezone.utc).astimezone(self._peru_tz)
+        else:
+            uploaded_at = uploaded_at.astimezone(self._peru_tz)
         return Meal(
             id=model.id,
             name=model.name,
@@ -57,5 +63,5 @@ class SqlAlchemyMealRepository(MealRepository):
             protein=model.protein,
             carbs=model.carbs,
             fats=model.fats,
-            uploaded_at=model.uploaded_at,
+            uploaded_at=uploaded_at,
         )
